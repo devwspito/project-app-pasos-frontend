@@ -1,0 +1,121 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T20:46:33.667Z",
+    "phase": "techlead",
+    "epicId": "epic-frontend-foundation",
+    "savedAt": "2026-01-20T20:46:33.667Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-frontend-foundation",
+    "storiesCount": 4,
+    "architecture": "**Frontend Foundation Architecture**\n\nThis epic establishes a modern React + Ionic + TypeScript development environment using Vite as the build tool.\n\n**Technology Stack:**\n- React 18.x with TypeScript 5.x\n- Ionic React 7.x for mobile-first UI components\n- Vite for fast development and optimized builds\n- ESLint + Prettier for code quality\n\n**Design Decisions:**\n1. **Vite over CRA**: Vite provides faster HMR (Hot Module Replacement) and smaller bundle sizes\n2. **Ionic React**: Provides native-feeling UI components optimized for mobile\n3. **Strict TypeScript**: Enables better type safety and IDE support\n4. **Path Aliases**: @/* maps to src/* for cleaner imports\n\n**Dependency Direction:**\n- index.html → main.tsx → App.tsx → Ionic components\n- All files depend on package.json being configured first\n- TypeScript config must exist before source files can be type-checked\n\n**Performance Considerations:**\n- Vite's tree-shaking removes unused code\n- Ionic CSS imports are ordered for optimal loading\n- Production builds are minified and optimized\n\n**SOLID Compliance:**\n- SRP: Each file has a single responsibility (config, entry, app shell)\n- OCP: Foundation is extensible for additional features (routing, state)\n- DIP: No direct dependencies on concrete implementations yet",
+    "stories": [
+      {
+        "id": "epic-frontend-foundation-story-1",
+        "title": "Create package.json with React + Ionic dependencies",
+        "description": "Initialize package.json with all required dependencies for the Pasos step counter app.\n\n**Production Dependencies:**\n- react, react-dom (^18.2.0)\n- @ionic/react, @ionic/react-router (^7.0.0)\n- react-router-dom (^6.0.0)\n- axios (for API calls)\n- socket.io-client (for real-time updates)\n- chart.js, react-chartjs-2 (for step visualizations)\n- date-fns (for date formatting)\n- ionicons (Ionic icon library)\n\n**Dev Dependencies:**\n- typescript (^5.0.0)\n- vite, @vitejs/plugin-react\n- eslint, prettier, eslint-config-prettier\n- @types/react, @types/react-dom, @types/node\n\n**Scripts to define:**\n```json\n\"scripts\": {\n  \"dev\": \"vite\",\n  \"build\": \"tsc && vite build\",\n  \"preview\": \"vite preview\",\n  \"lint\": \"eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0\",\n  \"typecheck\": \"tsc --noEmit\"\n}\n```\n\n🔧 **PATTERNS TO USE:**\n- Use exact versions for @ionic/react packages to avoid breaking changes\n- Include \"type\": \"module\" for ESM support\n- Set engines.node to \">=18.0.0\"\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use Create React App (CRA) - use Vite instead\n- DO NOT mix @ionic/react v6 with v7 dependencies\n- DO NOT add @capacitor/* packages yet (handled in separate epic)\n\n**VERIFICATION:**\n1. Run `npm install` - should complete without errors\n2. Verify node_modules/@ionic/react exists\n3. Verify all scripts are defined in package.json",
+        "epicId": "epic-frontend-foundation",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "package.json"
+        ],
+        "acceptanceCriteria": [
+          "Given a fresh repository, When npm install is run, Then all dependencies install without errors",
+          "Given package.json, When inspecting scripts, Then dev, build, preview, lint, and typecheck scripts exist",
+          "Given package.json, When checking dependencies, Then @ionic/react ^7.0.0, react ^18.2.0, and vite are present"
+        ]
+      },
+      {
+        "id": "epic-frontend-foundation-story-2",
+        "title": "Configure TypeScript and Vite build tooling",
+        "description": "Create TypeScript and Vite configuration files for React + Ionic development with proper path aliases.\n\n**tsconfig.json:**\n```json\n{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"useDefineForClassFields\": true,\n    \"lib\": [\"ES2020\", \"DOM\", \"DOM.Iterable\"],\n    \"module\": \"ESNext\",\n    \"skipLibCheck\": true,\n    \"moduleResolution\": \"bundler\",\n    \"allowImportingTsExtensions\": true,\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"noEmit\": true,\n    \"jsx\": \"react-jsx\",\n    \"strict\": true,\n    \"noUnusedLocals\": true,\n    \"noUnusedParameters\": true,\n    \"noFallthroughCasesInSwitch\": true,\n    \"baseUrl\": \".\",\n    \"paths\": {\n      \"@/*\": [\"src/*\"]\n    }\n  },\n  \"include\": [\"src\"],\n  \"references\": [{ \"path\": \"./tsconfig.node.json\" }]\n}\n```\n\n**tsconfig.node.json:**\n- Configure for Vite config file compilation\n- Use \"module\": \"ESNext\"\n\n**vite.config.ts:**\n```typescript\nimport { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nimport path from 'path'\n\nexport default defineConfig({\n  plugins: [react()],\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src')\n    }\n  },\n  server: {\n    port: 3000\n  }\n})\n```\n\n🔧 **PATTERNS TO USE:**\n- Use \"bundler\" moduleResolution for Vite compatibility\n- Enable strict mode for better type safety\n- Configure path alias @/* → src/*\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use \"node\" moduleResolution (causes issues with Vite)\n- DO NOT set noEmit: false (Vite handles bundling)\n- DO NOT forget tsconfig.node.json (required by Vite)\n\n**VERIFICATION:**\n1. Run `npx tsc --noEmit` - should complete with no errors (may warn about missing src files, that's ok)\n2. Verify path aliases resolve: create test import `import {} from '@/test'`",
+        "epicId": "epic-frontend-foundation",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-frontend-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "package.json"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "tsconfig.json",
+          "tsconfig.node.json",
+          "vite.config.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given tsconfig.json, When path alias @/components is used, Then it resolves to src/components",
+          "Given vite.config.ts, When vite build runs, Then it completes without configuration errors",
+          "Given tsconfig.json, When strict mode is enabled, Then noUnusedLocals and noUnusedParameters are true"
+        ]
+      },
+      {
+        "id": "epic-frontend-foundation-story-3",
+        "title": "Setup ESLint and Prettier configuration",
+        "description": "Configure ESLint for TypeScript + React with Prettier integration for consistent code formatting.\n\n**.eslintrc.cjs:**\n```javascript\nmodule.exports = {\n  root: true,\n  env: { browser: true, es2020: true },\n  extends: [\n    'eslint:recommended',\n    'plugin:@typescript-eslint/recommended',\n    'plugin:react-hooks/recommended',\n    'prettier'\n  ],\n  ignorePatterns: ['dist', '.eslintrc.cjs'],\n  parser: '@typescript-eslint/parser',\n  plugins: ['react-refresh'],\n  rules: {\n    'react-refresh/only-export-components': [\n      'warn',\n      { allowConstantExport: true }\n    ],\n    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]\n  }\n}\n```\n\n**.prettierrc:**\n```json\n{\n  \"semi\": true,\n  \"trailingComma\": \"es5\",\n  \"singleQuote\": true,\n  \"printWidth\": 100,\n  \"tabWidth\": 2,\n  \"useTabs\": false\n}\n```\n\n**.eslintignore:**\n```\nnode_modules\ndist\nbuild\n*.config.js\n*.config.ts\n```\n\n🔧 **PATTERNS TO USE:**\n- Extend 'prettier' LAST in extends array to disable conflicting rules\n- Use .cjs extension for ESLint config (CommonJS in ESM project)\n- Allow unused vars starting with underscore (_unused)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT use eslint-plugin-prettier (deprecated approach)\n- DO NOT configure formatting rules in ESLint (let Prettier handle it)\n- DO NOT forget to add 'prettier' to extends array\n\n**VERIFICATION:**\n1. Run `npm run lint` - should pass with no errors (may show 0 files if src is empty)\n2. Create a test .ts file with inconsistent formatting, run prettier --check",
+        "epicId": "epic-frontend-foundation",
+        "priority": 3,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-frontend-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "package.json"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          ".eslintrc.cjs",
+          ".prettierrc",
+          ".eslintignore"
+        ],
+        "acceptanceCriteria": [
+          "Given .eslintrc.cjs, When npm run lint is executed, Then no ESLint configuration errors occur",
+          "Given .prettierrc, When Prettier formats code, Then semicolons are added and single quotes are used",
+          "Given both configs, When a file is linted and formatted, Then no conflicts between ESLint and Prettier rules"
+        ]
+      },
+      {
+        "id": "epic-frontend-foundation-story-4",
+        "title": "Create entry point index.html and App shell with Ionic",
+        "description": "Create the application entry point files: index.html, main.tsx, App.tsx, and base styles.\n\n**index.html:**\n```html\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\" />\n  <meta name=\"format-detection\" content=\"telephone=no\" />\n  <meta name=\"msapplication-tap-highlight\" content=\"no\" />\n  <meta name=\"color-scheme\" content=\"light dark\" />\n  <title>Pasos - Step Counter</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n  <script type=\"module\" src=\"/src/main.tsx\"></script>\n</body>\n</html>\n```\n\n**src/main.tsx:**\n```typescript\nimport React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport App from './App';\nimport './index.css';\n\nconst container = document.getElementById('root');\nconst root = createRoot(container!);\nroot.render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);\n```\n\n**src/App.tsx:**\n```typescript\nimport { IonApp, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, setupIonicReact } from '@ionic/react';\nimport '@ionic/react/css/core.css';\nimport '@ionic/react/css/normalize.css';\nimport '@ionic/react/css/structure.css';\nimport '@ionic/react/css/typography.css';\nimport '@ionic/react/css/padding.css';\nimport '@ionic/react/css/float-elements.css';\nimport '@ionic/react/css/text-alignment.css';\nimport '@ionic/react/css/text-transformation.css';\nimport '@ionic/react/css/flex-utils.css';\nimport '@ionic/react/css/display.css';\n\nsetupIonicReact();\n\nconst App: React.FC = () => (\n  <IonApp>\n    <IonPage>\n      <IonHeader>\n        <IonToolbar>\n          <IonTitle>Pasos</IonTitle>\n        </IonToolbar>\n      </IonHeader>\n      <IonContent className=\"ion-padding\">\n        <h1>Welcome to Pasos!</h1>\n        <p>Your step counter app is ready.</p>\n      </IonContent>\n    </IonPage>\n  </IonApp>\n);\n\nexport default App;\n```\n\n**src/vite-env.d.ts:**\n```typescript\n/// <reference types=\"vite/client\" />\n```\n\n**src/index.css:**\n```css\n:root {\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;\n}\n\n* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n```\n\n🔧 **PATTERNS TO USE:**\n- Call setupIonicReact() BEFORE rendering any Ionic components\n- Import ALL Ionic CSS files in the order shown (required for proper styling)\n- Use viewport-fit=cover for iOS safe area support\n- Wrap root with IonApp (required for Ionic to work)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT forget setupIonicReact() - app will look broken\n- DO NOT skip Ionic CSS imports - components won't style correctly\n- DO NOT use regular div instead of IonPage/IonContent\n- DO NOT remove viewport meta tag configuration (breaks mobile layout)\n\n**VERIFICATION:**\n1. Run `npm run build` - should complete successfully\n2. Run `npm run dev` - should start dev server on port 3000\n3. Open http://localhost:3000 - should see Ionic-styled \"Welcome to Pasos!\" page",
+        "epicId": "epic-frontend-foundation",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-frontend-foundation-story-1",
+          "epic-frontend-foundation-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "package.json",
+          "tsconfig.json",
+          "vite.config.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "index.html",
+          "src/main.tsx",
+          "src/App.tsx",
+          "src/vite-env.d.ts",
+          "src/index.css"
+        ],
+        "acceptanceCriteria": [
+          "Given all entry files created, When npm run build is executed, Then build completes with no TypeScript errors",
+          "Given App.tsx with Ionic components, When rendered in browser, Then Ionic styling is applied correctly",
+          "Given index.html viewport meta, When viewed on mobile, Then safe area insets are respected"
+        ]
+      }
+    ]
+  }
+}
