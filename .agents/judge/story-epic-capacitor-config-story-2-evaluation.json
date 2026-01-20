@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T21:24:09.320Z",
+    "phase": "judge",
+    "storyId": "epic-capacitor-config-story-2",
+    "savedAt": "2026-01-20T21:24:09.320Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-capacitor-config-story-2",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
