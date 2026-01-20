@@ -1,0 +1,167 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T23:32:07.225Z",
+    "phase": "techlead",
+    "epicId": "epic-auth-ui",
+    "savedAt": "2026-01-20T23:32:07.225Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-auth-ui",
+    "storiesCount": 5,
+    "architecture": "## Authentication Architecture\n\n### Layer Structure (Clean Architecture)\n```\nPages (UI Layer)\n  └── src/pages/Login.tsx, Register.tsx, auth/ForgotPasswordPage.tsx\n      └── Uses Components\n          └── src/components/auth/LoginForm.tsx, RegisterForm.tsx\n              └── Uses Hooks\n                  └── src/hooks/useAuth.ts\n                      └── Uses Context\n                          └── src/contexts/AuthContext.tsx\n                              └── Uses Services\n                                  └── src/services/authService.ts\n                                      └── Uses API Layer\n                                          └── src/services/api.ts\n                                              └── Uses Utils\n                                                  └── src/utils/storage.ts, tokenUtils.ts\n```\n\n### JWT Token Flow\n1. Login/Register → API returns { accessToken, refreshToken, expiresAt }\n2. Tokens stored via storage.ts (localStorage wrapper)\n3. api.ts interceptor adds Bearer token to all requests\n4. 401 response triggers automatic refresh attempt\n5. Failed refresh clears auth state and redirects to login\n\n### Type Safety\n- All auth types from src/types/user.types.ts (UserCredentials, AuthSession, etc.)\n- API responses wrapped in ApiResponse<T> from src/types/api.types.ts\n\n### Security Considerations\n- Tokens stored in localStorage (not cookies) for Capacitor compatibility\n- Token expiry checked before requests\n- Automatic logout on refresh failure\n- No sensitive data in URL parameters\n\n### SOLID Compliance\n- **SRP**: Each service has one responsibility (authService for auth, api for HTTP)\n- **OCP**: Services use interfaces, easy to swap implementations\n- **DIP**: Components depend on hooks/context abstractions, not direct API calls",
+    "stories": [
+      {
+        "id": "story-auth-001",
+        "title": "Create axios API service with interceptors in src/services/api.ts",
+        "description": "Create foundational API service layer with axios instance, token management utilities, and secure storage.\n\n🔧 **PATTERNS TO USE:**\n- Use `ApiResponse<T>` and `ApiError` types from `src/types/api.types.ts`\n- Use `AuthSession` type from `src/types/user.types.ts` for token structure\n- Follow Ionic storage patterns for Capacitor compatibility\n\n📦 **IMPLEMENTATION DETAILS:**\n1. `src/services/api.ts`: Create axios instance with baseURL from env, request interceptor to add Bearer token, response interceptor for 401 handling\n2. `src/utils/storage.ts`: Wrapper for localStorage with async API (Capacitor-ready)\n3. `src/utils/tokenUtils.ts`: Functions for token parsing, expiry checking, refresh logic\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Direct localStorage calls in components ← Use storage.ts wrapper\n- Hardcoded API URLs ← Use environment variable\n- Synchronous token checks ← Use async storage API\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/api.types.ts",
+          "src/types/user.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/services/api.ts",
+          "src/utils/storage.ts",
+          "src/utils/tokenUtils.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given the api.ts file exists, When imported, Then it exports a configured axios instance with baseURL",
+          "Given a valid auth token in storage, When making API requests, Then Bearer token is automatically added to Authorization header",
+          "Given a 401 response, When interceptor catches it, Then it attempts token refresh before failing",
+          "Given storage.ts exists, When calling getItem/setItem/removeItem, Then operations complete asynchronously",
+          "Given tokenUtils.ts exists, When calling isTokenExpired with a JWT, Then it correctly returns true/false based on exp claim"
+        ]
+      },
+      {
+        "id": "story-auth-002",
+        "title": "Implement authService.ts and enhance AuthContext with real API calls",
+        "description": "Create authentication service and upgrade AuthContext to use real API endpoints with token persistence.\n\n🔧 **PATTERNS TO USE:**\n- Use `api` instance from `src/services/api.ts` (created in story-auth-001)\n- Use `storage` functions from `src/utils/storage.ts`\n- Use `tokenUtils` from `src/utils/tokenUtils.ts`\n- Extend existing `AuthContextType` interface in `src/contexts/AuthContext.tsx`\n- Use `UserCredentials`, `UserRegistration`, `AuthSession` from `src/types/user.types.ts`\n\n📦 **IMPLEMENTATION DETAILS:**\n1. `src/services/authService.ts`: \n   - `login(credentials: UserCredentials): Promise<AuthSession>`\n   - `register(data: UserRegistration): Promise<AuthSession>`\n   - `logout(): Promise<void>`\n   - `refreshToken(): Promise<AuthSession>`\n   - `checkUsernameAvailable(username: string): Promise<boolean>`\n\n2. Enhance `src/contexts/AuthContext.tsx`:\n   - Add token state management\n   - Add auto-login on mount (check stored tokens)\n   - Integrate authService calls\n   - Add error state\n\n3. Enhance `src/hooks/useAuth.ts`:\n   - Export additional auth utilities if needed\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- `new Promise()` with setTimeout ← Remove mock implementations\n- Direct fetch() calls ← Use api instance\n- Storing tokens in component state only ← Persist to storage\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 2,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "story-auth-001"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/services/api.ts",
+          "src/utils/storage.ts",
+          "src/utils/tokenUtils.ts",
+          "src/types/user.types.ts"
+        ],
+        "filesToModify": [
+          "src/contexts/AuthContext.tsx",
+          "src/hooks/useAuth.ts"
+        ],
+        "filesToCreate": [
+          "src/services/authService.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given authService.ts exists, When calling login with valid credentials, Then it calls POST /auth/login and returns AuthSession",
+          "Given authService.ts exists, When calling register with valid data, Then it calls POST /auth/register and returns AuthSession",
+          "Given AuthContext mounts, When tokens exist in storage, Then it auto-logs in the user",
+          "Given login succeeds, When AuthSession is returned, Then tokens are persisted to storage",
+          "Given logout is called, When executed, Then tokens are cleared from storage and user state is null"
+        ]
+      },
+      {
+        "id": "story-auth-003",
+        "title": "Build Login page with form validation using Ionic components",
+        "description": "Enhance Login page with complete form, validation, error handling, and loading states.\n\n🔧 **PATTERNS TO USE:**\n- Use `useAuth()` hook from `src/hooks/useAuth.ts`\n- Use Ionic form components: `IonInput`, `IonItem`, `IonLabel`, `IonButton`, `IonSpinner`\n- Use `IonToast` for error messages\n- Use `useHistory` from `react-router-dom` for navigation\n- Follow existing page structure in `src/pages/Login.tsx`\n\n📦 **IMPLEMENTATION DETAILS:**\n1. `src/components/auth/LoginForm.tsx`:\n   - Email input with email validation\n   - Password input with show/hide toggle\n   - Form submission handler\n   - Loading state during API call\n   - Error display with IonToast\n   - Link to register and forgot password\n\n2. Enhance `src/pages/Login.tsx`:\n   - Import and use LoginForm component\n   - Handle successful login redirect to /dashboard\n   - Redirect away if already authenticated\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- `console.log` for errors ← Use IonToast\n- Inline form logic in page ← Extract to LoginForm component\n- Allowing submit while loading ← Disable button during API call\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "story-auth-002"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/hooks/useAuth.ts",
+          "src/contexts/AuthContext.tsx",
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [
+          "src/pages/Login.tsx"
+        ],
+        "filesToCreate": [
+          "src/components/auth/LoginForm.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given the Login page loads, When rendered, Then email and password input fields are visible",
+          "Given empty email field, When form is submitted, Then validation error is shown",
+          "Given invalid email format, When form is submitted, Then 'Invalid email' error is shown",
+          "Given valid credentials, When login button clicked, Then loading spinner shows during API call",
+          "Given invalid credentials from API, When login fails, Then error toast message is displayed",
+          "Given successful login, When API returns, Then user is redirected to /dashboard"
+        ]
+      },
+      {
+        "id": "story-auth-004",
+        "title": "Build Register page with username availability check",
+        "description": "Enhance Register page with complete registration form including real-time username availability checking.\n\n🔧 **PATTERNS TO USE:**\n- Use `useAuth()` hook from `src/hooks/useAuth.ts`\n- Use `authService.checkUsernameAvailable()` from `src/services/authService.ts`\n- Use Ionic form components: `IonInput`, `IonItem`, `IonLabel`, `IonButton`, `IonSpinner`, `IonIcon`\n- Use `IonToast` for success/error messages\n- Follow existing page structure in `src/pages/Register.tsx`\n- Use debounce (300ms) for username availability check\n\n📦 **IMPLEMENTATION DETAILS:**\n1. `src/components/auth/RegisterForm.tsx`:\n   - Username input with availability indicator (checkmark/x icon)\n   - Email input with email validation\n   - Password input with strength indicator\n   - Confirm password input with match validation\n   - Name field\n   - Terms acceptance checkbox\n   - Submit button with loading state\n   - Real-time username check with debounce\n\n2. Enhance `src/pages/Register.tsx`:\n   - Import and use RegisterForm component\n   - Handle successful registration redirect\n   - Show welcome message on success\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Checking username on every keystroke ← Use debounce\n- Allowing mismatched passwords to submit ← Validate before submit\n- `register()` directly in form ← Use authService through useAuth\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 4,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "story-auth-002"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/hooks/useAuth.ts",
+          "src/services/authService.ts",
+          "src/contexts/AuthContext.tsx"
+        ],
+        "filesToModify": [
+          "src/pages/Register.tsx"
+        ],
+        "filesToCreate": [
+          "src/components/auth/RegisterForm.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given the Register page loads, When rendered, Then username, email, password, confirm password fields are visible",
+          "Given username input, When user types and pauses 300ms, Then availability check is triggered",
+          "Given username is available, When check completes, Then green checkmark icon is shown",
+          "Given username is taken, When check completes, Then red X icon and error message is shown",
+          "Given passwords don't match, When confirm password loses focus, Then validation error is shown",
+          "Given valid form data, When register button clicked, Then loading spinner shows during API call",
+          "Given successful registration, When API returns, Then welcome toast shows and user redirects to /dashboard"
+        ]
+      },
+      {
+        "id": "story-auth-005",
+        "title": "Create Forgot Password page and add route to AppRouter",
+        "description": "Create placeholder Forgot Password page with informational message and register route.\n\n🔧 **PATTERNS TO USE:**\n- Use Ionic page structure: `IonPage`, `IonHeader`, `IonToolbar`, `IonContent`\n- Use `IonBackButton` for navigation back to login\n- Follow existing page patterns in `src/pages/Login.tsx`\n- Add route in `src/router/AppRouter.tsx` following existing route patterns\n\n📦 **IMPLEMENTATION DETAILS:**\n1. `src/pages/auth/ForgotPasswordPage.tsx`:\n   - Email input field with validation\n   - Informational message explaining no reset endpoint exists\n   - Contact support suggestion\n   - Back to login link\n   - Professional placeholder UI\n\n2. Modify `src/router/AppRouter.tsx`:\n   - Add import for ForgotPasswordPage\n   - Add Route for /forgot-password (public route)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Creating fake reset functionality ← Be honest about limitations\n- Broken navigation ← Ensure back button works\n- Missing route registration ← Add to AppRouter.tsx\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 5,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/Login.tsx",
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToModify": [
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToCreate": [
+          "src/pages/auth/ForgotPasswordPage.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given AppRouter.tsx is modified, When /forgot-password is visited, Then ForgotPasswordPage renders",
+          "Given ForgotPasswordPage loads, When rendered, Then email input field is visible",
+          "Given the page, When rendered, Then informational message about contacting support is displayed",
+          "Given the back button, When clicked, Then user navigates back to login page",
+          "Given email input, When invalid email entered and submitted, Then validation error shows"
+        ]
+      }
+    ]
+  }
+}
