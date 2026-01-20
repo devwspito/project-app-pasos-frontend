@@ -1,0 +1,20 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T21:19:11.458Z",
+    "phase": "judge",
+    "storyId": "epic-capacitor-config-story-1",
+    "savedAt": "2026-01-20T21:19:11.458Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-capacitor-config-story-1",
+    "verdict": "rejected",
+    "feedback": "🚨 AUTOMATIC REJECTION: Developer did not create required files.\n\nMissing files:\n- android/.gitkeep (empty file)\n- ios/.gitkeep (empty file)\n\nThe developer must create these files before the code can be reviewed.",
+    "issues": [
+      "Failed after 3 attempts - human intervention required"
+    ]
+  }
+}
