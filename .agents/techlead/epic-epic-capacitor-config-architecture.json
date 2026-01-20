@@ -1,0 +1,99 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T21:10:59.969Z",
+    "phase": "techlead",
+    "epicId": "epic-capacitor-config",
+    "savedAt": "2026-01-20T21:10:59.969Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-capacitor-config",
+    "storiesCount": 3,
+    "architecture": "## Capacitor Native Platform Architecture\n\n### Overview\nThis epic adds Capacitor to enable native iOS and Android builds while maintaining web compatibility. The architecture follows a layered approach with platform abstraction utilities.\n\n### Architecture Layers\n```\n┌─────────────────────────────────────┐\n│         React Components            │\n│    (import from src/utils/*)        │\n├─────────────────────────────────────┤\n│      Platform Utilities Layer       │\n│  ┌───────────┐  ┌────────────────┐  │\n│  │platform.ts│  │   health.ts    │  │\n│  │ (detect)  │  │ (step data)    │  │\n│  └───────────┘  └────────────────┘  │\n├─────────────────────────────────────┤\n│      Capacitor Plugin Layer         │\n│  @capacitor/core, status-bar,       │\n│  splash-screen, preferences,        │\n│  app, network, health               │\n├─────────────────────────────────────┤\n│      Native Platform Layer          │\n│  ┌─────────┐  ┌─────────────────┐   │\n│  │  iOS    │  │    Android      │   │\n│  │HealthKit│  │   Google Fit    │   │\n│  └─────────┘  └─────────────────┘   │\n└─────────────────────────────────────┘\n```\n\n### Key Design Decisions\n1. **TypeScript Config**: Using capacitor.config.ts (not .json) for type safety\n2. **Platform Abstraction**: All native calls go through utility functions that handle web fallbacks\n3. **Graceful Degradation**: Web environment gets mock data for development/testing\n4. **Plugin Isolation**: Components never import Capacitor plugins directly\n\n### File Structure\n```\n├── capacitor.config.ts    # Capacitor configuration\n├── android/.gitkeep       # Android platform placeholder\n├── ios/.gitkeep           # iOS platform placeholder\n└── src/\n    └── utils/\n        ├── platform.ts    # Platform detection + plugin wrappers\n        └── health.ts      # Health data access (steps)\n```\n\n### Setup Commands\n```bash\nnpm install\n```\n\n### Verification Commands\n- Typecheck: `npm run typecheck`\n- Lint: `npm run lint`\n- Build: `npm run build`\n\n### SOLID Principles Applied\n- **SRP**: platform.ts handles only platform detection, health.ts handles only health data\n- **OCP**: New plugins can be added without modifying existing utilities\n- **DIP**: Components depend on utility abstractions, not Capacitor plugins directly",
+    "stories": [
+      {
+        "id": "epic-capacitor-config-story-1",
+        "title": "Install Capacitor core, native plugins, and create capacitor.config.ts",
+        "description": "Install ALL Capacitor packages and create configuration file. This story handles ALL package.json modifications to prevent merge conflicts.\n\n**Packages to install:**\n- @capacitor/core, @capacitor/cli (core)\n- @capacitor/android, @capacitor/ios (platforms)\n- @capacitor/status-bar, @capacitor/splash-screen (UI plugins)\n- @capacitor/preferences, @capacitor/app, @capacitor/network (utility plugins)\n- @nickreid/capacitor-health (health data plugin)\n\n🔧 **PATTERNS TO USE:**\n- Use npm install to add packages (not manual package.json editing)\n- Follow Capacitor official setup: https://capacitorjs.com/docs/getting-started\n- Use TypeScript for capacitor.config.ts (not .json)\n- Set webDir to 'dist' to match Vite output\n- App ID format: com.pasos.app\n\n📦 **REQUIRED CONFIGURATION:**\n- capacitor.config.ts must export CapacitorConfig type\n- appId: 'com.pasos.app'\n- appName: 'Pasos'\n- webDir: 'dist'\n- server.androidScheme: 'https'\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT manually edit package.json - use npm install commands\n- DO NOT use capacitor.config.json - use TypeScript version\n- DO NOT set webDir to 'build' (that's CRA, we use Vite 'dist')\n\n**VERIFICATION:**\n```bash\nnpm install\nnpm run typecheck\nnpx cap --version\n```",
+        "epicId": "epic-capacitor-config",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "package.json",
+          "tsconfig.json",
+          "vite.config.ts"
+        ],
+        "filesToModify": [
+          "package.json"
+        ],
+        "filesToCreate": [
+          "capacitor.config.ts",
+          "android/.gitkeep",
+          "ios/.gitkeep"
+        ],
+        "acceptanceCriteria": [
+          "Given Capacitor packages are installed, When running 'npx cap --version', Then version number is displayed without errors",
+          "Given capacitor.config.ts exists, When inspecting the file, Then appId is 'com.pasos.app' and webDir is 'dist'",
+          "Given all native plugins are installed, When running 'npm run typecheck', Then no type errors occur",
+          "Given android/.gitkeep and ios/.gitkeep exist, When running 'git status', Then platform directories are tracked"
+        ]
+      },
+      {
+        "id": "epic-capacitor-config-story-2",
+        "title": "Create platform detection utility in src/utils/platform.ts",
+        "description": "Create a utility module for detecting the current platform (web, iOS, Android) and safely accessing Capacitor plugins.\n\n🔧 **PATTERNS TO USE:**\n- Use Capacitor.isNativePlatform() for native detection\n- Use Capacitor.getPlatform() for specific platform ('web', 'ios', 'android')\n- Export typed utility functions for consistent platform checks\n- Follow existing TypeScript patterns from src/App.tsx\n\n📦 **REQUIRED EXPORTS:**\n```typescript\nexport const isNative: () => boolean\nexport const isIOS: () => boolean\nexport const isAndroid: () => boolean\nexport const isWeb: () => boolean\nexport const getPlatform: () => 'ios' | 'android' | 'web'\n```\n\n📦 **PLUGIN WRAPPER FUNCTIONS:**\n```typescript\nexport const setStatusBarStyle: (style: 'light' | 'dark') => Promise<void>\nexport const hideSplashScreen: () => Promise<void>\nexport const getNetworkStatus: () => Promise<{ connected: boolean; connectionType: string }>\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT import Capacitor plugins directly in components - use this utility\n- DO NOT call native APIs without platform checks - will error on web\n- DO NOT use window.Capacitor - use @capacitor/core imports\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-capacitor-config",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-capacitor-config-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/App.tsx",
+          "capacitor.config.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/utils/platform.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given src/utils/platform.ts is created, When importing isNative, isIOS, isAndroid, isWeb, Then all functions are available and typed",
+          "Given platform utility exists, When running 'npm run typecheck', Then no TypeScript errors occur",
+          "Given the code runs in browser, When calling isWeb(), Then it returns true",
+          "Given plugin wrapper functions exist, When calling them on web, Then they gracefully handle non-native environment"
+        ]
+      },
+      {
+        "id": "epic-capacitor-config-story-3",
+        "title": "Create health plugin configuration in src/utils/health.ts",
+        "description": "Create a health data utility for HealthKit (iOS) and Google Fit (Android) integration using @nickreid/capacitor-health plugin.\n\n🔧 **PATTERNS TO USE:**\n- Use Health plugin from @nickreid/capacitor-health\n- Follow platform utility pattern from src/utils/platform.ts (story-2)\n- Check isNative() before calling health APIs\n- Return mock data on web for development\n\n📦 **REQUIRED EXPORTS:**\n```typescript\nexport interface StepData {\n  date: string;\n  steps: number;\n}\n\nexport const requestHealthPermissions: () => Promise<boolean>\nexport const getTodaySteps: () => Promise<number>\nexport const getStepsForDateRange: (startDate: Date, endDate: Date) => Promise<StepData[]>\nexport const isHealthAvailable: () => Promise<boolean>\n```\n\n📦 **PERMISSION CONFIGURATION (document in comments):**\n- iOS Info.plist: NSHealthShareUsageDescription, NSHealthUpdateUsageDescription\n- Android: android.permission.ACTIVITY_RECOGNITION, com.google.android.gms.permission.ACTIVITY_RECOGNITION\n\n📦 **MOCK DATA FOR WEB:**\n```typescript\n// When running on web, return mock step data for testing\nconst mockSteps = Math.floor(Math.random() * 5000) + 3000;\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- DO NOT call Health APIs without checking isHealthAvailable() first\n- DO NOT forget to handle permission denial gracefully\n- DO NOT block UI while requesting permissions - use async/await properly\n\n**VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-capacitor-config",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-capacitor-config-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/utils/platform.ts",
+          "capacitor.config.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/utils/health.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given src/utils/health.ts is created, When importing health functions, Then requestHealthPermissions, getTodaySteps, getStepsForDateRange, isHealthAvailable are available",
+          "Given health utility exists, When running 'npm run typecheck', Then no TypeScript errors occur",
+          "Given the code runs in browser (web), When calling getTodaySteps(), Then it returns mock step data without errors",
+          "Given permission configuration is documented, When reading the file, Then iOS plist keys and Android permissions are listed in comments"
+        ]
+      }
+    ]
+  }
+}
