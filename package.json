@@ -1,39 +1,68 @@
 {
-  "name": "pasos-frontend",
-  "version": "0.1.0",
-  "private": true,
+  "name": "app-pasos-frontend",
+  "version": "1.0.0",
+  "description": "Pasos - Step counter and fitness tracking mobile app frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ionic/react": "^7.0.0",
     "@ionic/react-router": "^7.0.0",
-    "ionicons": "^8.0.13",
+    "axios": "^1.6.0",
+    "chart.js": "^4.4.0",
+    "date-fns": "^3.0.0",
+    "ionicons": "^7.2.0",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^5.3.4"
+    "react-router-dom": "^5.3.0",
+    "socket.io-client": "^4.7.0"
   },
   "devDependencies": {
+    "@types/node": "^20.10.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "@types/react-router-dom": "^5.3.3",
+    "@types/react-router-dom": "^5.3.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^9.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.0",
-    "prettier": "^3.0.0",
+    "prettier": "^3.1.0",
     "typescript": "^5.0.0",
     "vite": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "keywords": [
+    "pasos",
+    "step-counter",
+    "fitness",
+    "ionic",
+    "react",
+    "mobile"
+  ],
+  "author": "",
+  "license": "MIT",
+  "private": true
 }
