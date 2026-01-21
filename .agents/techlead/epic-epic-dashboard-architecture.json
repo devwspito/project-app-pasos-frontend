@@ -1,0 +1,220 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-21T00:20:26.455Z",
+    "phase": "techlead",
+    "epicId": "epic-dashboard",
+    "savedAt": "2026-01-21T00:20:26.455Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-dashboard",
+    "storiesCount": 8,
+    "architecture": "## Dashboard Architecture\n\n### Component Hierarchy\n```\nDashboardPage\n├── IonRefresher (pull-to-refresh)\n├── StepCounter\n│   └── ProgressRing (SVG circular progress)\n├── StatsGrid (2x2)\n│   └── StatsCard (x4: Total, Average, Best, Streak)\n├── WeeklyChart\n│   └── Chart.js Bar/Line with toggle\n└── HourlyChart\n    └── Chart.js Bar + IonDatetime picker\n```\n\n### Data Flow\n```\nstepsService.ts → useSteps.ts hook → DashboardPage → Components\n```\n\n### Technology Stack\n- **UI Framework**: Ionic React 7 + React 18\n- **Charts**: Chart.js 4 + react-chartjs-2 5\n- **HTTP Client**: Axios (for future API integration)\n- **Date Handling**: date-fns 3\n- **State Management**: React hooks (useState, useEffect, useCallback)\n\n### Existing Types (src/types/activity.types.ts)\n- DailyStepSummary: Today's step data\n- WeeklyStats: 7-day aggregated data\n- HourlySteps: Per-hour breakdown\n- StepChartData: Chart visualization data\n\n### File Structure\n```\nsrc/\n├── services/\n│   └── stepsService.ts (NEW - API layer with mock data)\n├── hooks/\n│   └── useSteps.ts (NEW - data fetching hook)\n├── components/\n│   └── dashboard/\n│       ├── ProgressRing.tsx (NEW - SVG circular progress)\n│       ├── StepCounter.tsx (NEW - main counter display)\n│       ├── WeeklyChart.tsx (NEW - 7-day chart)\n│       ├── HourlyChart.tsx (NEW - hourly chart)\n│       └── StatsCard.tsx (NEW - reusable stat card)\n├── pages/\n│   └── DashboardPage.tsx (NEW - assembled page)\n└── router/\n    └── AppRouter.tsx (MODIFY - update import)\n```\n\n### Setup Commands\n```bash\nnpm install\n```\n\n### Verification Commands\n- Typecheck: `npm run typecheck`\n- Test: `npm test` (if tests exist)\n- Lint: `npm run lint`\n- Build: `npm run build`",
+    "stories": [
+      {
+        "id": "epic-dashboard-story-1",
+        "title": "Create stepsService.ts with API methods and mock data",
+        "description": "Create the steps service with methods for all step-related API endpoints. Since this is frontend-only (integration is separate), include mock data that returns realistic step data.\n\n🔧 **PATTERNS TO USE:**\n- Use axios for HTTP client (already in package.json)\n- Use existing types from `src/types/activity.types.ts`: DailyStepSummary, WeeklyStats, HourlySteps\n- Use ApiResponse<T> wrapper from `src/types/api.types.ts`\n- Follow async/await pattern with try/catch\n- Create mock data that simulates API responses for development\n\n📦 **REQUIRED METHODS:**\n- `getTodaySteps()`: Returns DailyStepSummary for today\n- `getWeeklySteps()`: Returns WeeklyStats for last 7 days\n- `getHourlySteps(date: string)`: Returns HourlySteps[] for specific date\n- `getStepStats()`: Returns object with totalAllTime, averageDaily, bestDay, currentStreak\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT create custom types - use existing ones from src/types/\n- Do NOT hardcode API URLs - use environment variable or config\n- Do NOT return raw data - wrap in ApiResponse format\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes\n- Service exports all 4 methods",
+        "epicId": "epic-dashboard",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/activity.types.ts",
+          "src/types/api.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/services/stepsService.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given the service is imported, When getTodaySteps() is called, Then it returns a DailyStepSummary with mock data",
+          "Given the service is imported, When getWeeklySteps() is called, Then it returns WeeklyStats with 7 daily summaries",
+          "Given a date string, When getHourlySteps(date) is called, Then it returns 24 HourlySteps entries",
+          "Given the service is imported, When getStepStats() is called, Then it returns stats object with totalAllTime, averageDaily, bestDay, currentStreak"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-2",
+        "title": "Create useSteps.ts hook with data fetching and state management",
+        "description": "Create the useSteps custom hook that provides step data with loading/error states and refetch capability.\n\n🔧 **PATTERNS TO USE:**\n- Follow existing useAuth hook pattern from `src/hooks/useAuth.ts`\n- Use useState for data, loading, error states\n- Use useEffect for initial data fetch\n- Use useCallback for refetch function\n- Use AsyncState<T> type from `src/types/api.types.ts` or create similar pattern\n- Import stepsService from `src/services/stepsService.ts`\n\n📦 **REQUIRED EXPORTS:**\n- Hook returns: { todaySteps, weeklySteps, hourlySteps, stats, isLoading, error, refetch, fetchHourlySteps }\n- All data types match activity.types.ts\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT call API directly in hook - use stepsService\n- Do NOT forget cleanup in useEffect\n- Do NOT expose setters - only expose data and refetch\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes\n- Hook can be imported without errors",
+        "epicId": "epic-dashboard",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/hooks/useAuth.ts",
+          "src/types/api.types.ts",
+          "src/services/stepsService.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/hooks/useSteps.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given the hook is used in a component, When component mounts, Then isLoading is true initially",
+          "Given the hook has fetched data, When data is loaded, Then todaySteps contains DailyStepSummary",
+          "Given an error occurs, When API fails, Then error contains error message",
+          "Given data is stale, When refetch() is called, Then data is refreshed"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-3",
+        "title": "Create ProgressRing.tsx SVG circular progress component",
+        "description": "Create an animated circular progress ring component using SVG for the step counter visualization.\n\n🔧 **PATTERNS TO USE:**\n- Use SVG circle with stroke-dasharray and stroke-dashoffset for progress\n- Use CSS transitions for smooth animation\n- Accept props: progress (0-100), size, strokeWidth, color\n- Follow functional component pattern with TypeScript props interface\n\n📦 **REQUIRED PROPS:**\n```typescript\ninterface ProgressRingProps {\n  progress: number; // 0-100\n  size?: number; // default 200\n  strokeWidth?: number; // default 12\n  primaryColor?: string; // default 'var(--ion-color-primary)'\n  backgroundColor?: string; // default '#e0e0e0'\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use canvas - use SVG for better accessibility\n- Do NOT inline styles without CSS variables\n- Do NOT forget aria-label for accessibility\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes\n- Component renders without errors",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/dashboard/ProgressRing.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given progress is 0, When component renders, Then ring shows empty (no fill)",
+          "Given progress is 50, When component renders, Then ring is half filled",
+          "Given progress is 100, When component renders, Then ring is completely filled",
+          "Given progress changes, When value updates, Then ring animates smoothly"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-4",
+        "title": "Create StepCounter.tsx with progress ring and step display",
+        "description": "Create the main step counter component that displays today's steps with the circular progress ring, percentage, and remaining steps.\n\n🔧 **PATTERNS TO USE:**\n- Import ProgressRing from `src/components/dashboard/ProgressRing.tsx`\n- Use Ionic components: IonCard, IonCardContent, IonText\n- Use DailyStepSummary type from `src/types/activity.types.ts`\n- Calculate percentage: (currentSteps / goalSteps) * 100\n- Format numbers with toLocaleString() for readability\n\n📦 **REQUIRED PROPS:**\n```typescript\ninterface StepCounterProps {\n  currentSteps: number;\n  goalSteps: number; // default 10000\n  isLoading?: boolean;\n}\n```\n\n📦 **REQUIRED DISPLAY:**\n- Large step count number in center\n- Circular progress ring around the number\n- Percentage completed below\n- Remaining steps text\n- Goal text (e.g., 'Goal: 10,000')\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT hardcode goal - accept as prop\n- Do NOT forget loading state skeleton\n- Do NOT use inline magic numbers\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/dashboard/ProgressRing.tsx",
+          "src/types/activity.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/dashboard/StepCounter.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given steps and goal, When component renders, Then large step count is displayed",
+          "Given steps and goal, When component renders, Then progress ring shows correct percentage",
+          "Given steps < goal, When component renders, Then remaining steps are shown",
+          "Given isLoading is true, When component renders, Then skeleton/loading state is shown"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-5",
+        "title": "Create WeeklyChart.tsx with Chart.js bar/line toggle",
+        "description": "Create the weekly trend chart component using Chart.js showing steps for the last 7 days with bar/line toggle.\n\n🔧 **PATTERNS TO USE:**\n- Import { Bar, Line } from 'react-chartjs-2'\n- Import Chart.js components and register them:\n  ```typescript\n  import { Chart, CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend } from 'chart.js';\n  Chart.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);\n  ```\n- Use WeeklyStats type from `src/types/activity.types.ts`\n- Use IonSegment, IonSegmentButton for chart type toggle\n- Use format() from date-fns for day labels\n\n📦 **REQUIRED PROPS:**\n```typescript\ninterface WeeklyChartProps {\n  data: WeeklyStats | null;\n  isLoading?: boolean;\n}\n```\n\n📦 **CHART CONFIG:**\n- Labels: Day names (Mon, Tue, Wed...)\n- Data: Step counts from dailySummaries\n- Goal line: Horizontal line at goalSteps\n- Responsive: true\n- Maintain aspect ratio on mobile\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT forget to register Chart.js components\n- Do NOT use fixed pixel sizes - use responsive config\n- Do NOT forget empty state when data is null\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes",
+        "epicId": "epic-dashboard",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/activity.types.ts",
+          "src/components/common/EmptyState.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/dashboard/WeeklyChart.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given weekly data, When component renders, Then chart displays 7 days of data",
+          "Given chart type is 'bar', When user sees chart, Then bars are displayed",
+          "Given chart type is 'line', When toggle is clicked, Then line chart is displayed",
+          "Given no data, When component renders, Then empty/loading state is shown"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-6",
+        "title": "Create HourlyChart.tsx with 24-hour distribution and date picker",
+        "description": "Create the hourly distribution chart showing step activity by hour for a selected day.\n\n🔧 **PATTERNS TO USE:**\n- Import { Bar } from 'react-chartjs-2' (bar chart works best for hourly)\n- Use HourlySteps[] type from `src/types/activity.types.ts`\n- Use IonDatetime for date selection (Ionic component)\n- Use format() from date-fns for formatting\n- Highlight peak hours with different color\n\n📦 **REQUIRED PROPS:**\n```typescript\ninterface HourlyChartProps {\n  data: HourlySteps[] | null;\n  selectedDate: string;\n  onDateChange: (date: string) => void;\n  isLoading?: boolean;\n}\n```\n\n📦 **CHART CONFIG:**\n- Labels: Hours (0-23 or 12am, 1am...)\n- Data: Step counts per hour\n- Peak hours: Highlight bars > average with accent color\n- Show 0 for hours with no activity\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT allow future dates in date picker\n- Do NOT forget empty state for hours with 0 steps\n- Do NOT use hardcoded colors - use CSS variables\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes",
+        "epicId": "epic-dashboard",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/activity.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/dashboard/HourlyChart.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given hourly data, When component renders, Then 24-bar chart is displayed",
+          "Given date picker, When user selects a date, Then onDateChange is called",
+          "Given peak hours, When steps > average, Then bars are highlighted",
+          "Given no data for an hour, When chart renders, Then 0 is shown for that hour"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-7",
+        "title": "Create StatsCard.tsx reusable statistics card component",
+        "description": "Create reusable stat card components showing statistics with icons in a grid layout.\n\n🔧 **PATTERNS TO USE:**\n- Use IonCard, IonCardContent, IonIcon from Ionic\n- Use icons from ionicons: trophy, flame, calendar, walk\n- Create single StatsCard component that's reusable\n- Format numbers with toLocaleString()\n\n📦 **REQUIRED PROPS:**\n```typescript\ninterface StatsCardProps {\n  title: string; // e.g., 'Total Steps', 'Daily Average'\n  value: string | number;\n  icon: string; // ionicon name\n  color?: string; // ion-color name\n  isLoading?: boolean;\n}\n```\n\n📦 **REQUIRED LAYOUT:**\n- Icon on left or top\n- Title as label\n- Value prominently displayed\n- Skeleton loading state when isLoading\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT create 4 separate components - create 1 reusable StatsCard\n- Do NOT hardcode stat values - accept as props\n- Do NOT forget loading skeleton state\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes",
+        "epicId": "epic-dashboard",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/dashboard/StatsCard.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given title and value, When component renders, Then both are displayed",
+          "Given icon name, When component renders, Then correct icon is shown",
+          "Given isLoading is true, When component renders, Then skeleton is shown",
+          "Given large number, When value is displayed, Then it's formatted with commas"
+        ]
+      },
+      {
+        "id": "epic-dashboard-story-8",
+        "title": "Create DashboardPage.tsx and update AppRouter",
+        "description": "Create the main DashboardPage that assembles all dashboard components with pull-to-refresh and update the router.\n\n🔧 **PATTERNS TO USE:**\n- Follow existing page pattern from `src/pages/Dashboard.tsx`\n- Use IonPage, IonHeader, IonContent, IonRefresher, IonRefresherContent\n- Import useSteps hook from `src/hooks/useSteps.ts`\n- Import all dashboard components from `src/components/dashboard/`\n- Update AppRouter to import DashboardPage instead of Dashboard\n\n📦 **REQUIRED IMPORTS:**\n- StepCounter, WeeklyChart, HourlyChart, StatsCard, ProgressRing\n- useSteps hook\n- Ionic components for page structure\n\n📦 **PAGE LAYOUT:**\n1. Header with title 'Dashboard'\n2. Pull-to-refresh with IonRefresher\n3. StepCounter at top (prominent)\n4. Stats grid (2x2) with 4 StatsCard components\n5. WeeklyChart section\n6. HourlyChart section with date picker\n\n📦 **ROUTER UPDATE:**\n- Change Dashboard import to DashboardPage in AppRouter.tsx\n- Keep same route path '/dashboard'\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT duplicate hook logic - use useSteps\n- Do NOT forget error handling with retry\n- Do NOT forget to handle loading states for each section\n- Do NOT create new route - update existing one\n\n🧪 **VERIFICATION:**\n- npm run typecheck passes\n- npm run lint passes\n- npm run build succeeds",
+        "epicId": "epic-dashboard",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-dashboard-story-2",
+          "epic-dashboard-story-4",
+          "epic-dashboard-story-5",
+          "epic-dashboard-story-6",
+          "epic-dashboard-story-7"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/Dashboard.tsx",
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToModify": [
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToCreate": [
+          "src/pages/DashboardPage.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given user navigates to /dashboard, When page loads, Then DashboardPage renders",
+          "Given data is loading, When page renders, Then loading states are shown",
+          "Given user pulls down, When pull-to-refresh activates, Then data is refreshed",
+          "Given an error occurs, When user sees error, Then retry button is available"
+        ]
+      }
+    ]
+  }
+}

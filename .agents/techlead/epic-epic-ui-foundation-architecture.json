@@ -1,0 +1,172 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-20T21:37:41.477Z",
+    "phase": "techlead",
+    "epicId": "epic-ui-foundation",
+    "savedAt": "2026-01-20T21:37:41.477Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-ui-foundation",
+    "storiesCount": 6,
+    "architecture": "## Architecture Design: UI Foundation\n\n### Layer Structure\n```\nsrc/\n├── theme/              # Ionic CSS variables & global styles\n│   ├── variables.css   # --ion-color-* definitions\n│   └── global.css      # Typography, utilities\n├── contexts/           # React Context providers\n│   └── ThemeContext.tsx\n├── hooks/              # Custom React hooks\n│   └── useTheme.ts\n├── components/\n│   ├── layout/         # App shell components\n│   │   ├── AppLayout.tsx\n│   │   └── TabBar.tsx\n│   └── common/         # Reusable UI components\n│       ├── LoadingSpinner.tsx\n│       ├── ErrorBoundary.tsx\n│       └── EmptyState.tsx\n├── router/             # Routing configuration\n│   ├── AppRouter.tsx\n│   └── ProtectedRoute.tsx\n├── pages/              # Page components\n│   └── Home.tsx\n└── types/              # TypeScript definitions\n    ├── index.ts        # Barrel export\n    ├── user.ts\n    ├── step.ts\n    ├── sharing.ts\n    ├── goal.ts\n    └── api.ts\n```\n\n### Design Principles Applied\n\n1. **Single Responsibility (SRP)**: Each file has one purpose - ThemeContext manages theme, TabBar renders tabs, types define shapes.\n\n2. **Open/Closed (OCP)**: Types use generics (ApiResponse<T>) for extension without modification.\n\n3. **Dependency Inversion (DIP)**: Components depend on hooks (useTheme) not implementations (localStorage directly).\n\n### Theming Strategy\n- Ionic CSS custom properties for runtime theme switching\n- No JavaScript re-renders needed for theme change - CSS handles it\n- System preference detection via CSS media query + JS fallback\n- localStorage persistence for user preference\n\n### Routing Strategy\n- IonReactRouter for native-feel page transitions\n- ProtectedRoute wrapper pattern for auth guards\n- Centralized route definitions in AppRouter\n- Tab-based navigation with IonTabs\n\n### Setup Commands\n```bash\nnpm install\n```\n\n### Verification Commands\n- Typecheck: `npm run typecheck` or `npx tsc --noEmit`\n- Build: `npm run build`\n- Lint: `npm run lint`",
+    "stories": [
+      {
+        "id": "epic-ui-foundation-story-1",
+        "title": "Create Ionic theme variables and global styles in src/theme/",
+        "description": "Define CSS custom properties for colors, spacing, typography following Ionic's theming conventions. Create both light and dark theme variables with system preference detection via prefers-color-scheme media query.\n\n🔧 PATTERNS TO USE:\n- Use Ionic CSS variable naming: --ion-color-primary, --ion-color-secondary, etc.\n- Define color variants: base, contrast, shade, tint for each color\n- Use @media (prefers-color-scheme: dark) for auto dark mode\n- Import variables.css in main.tsx AFTER @ionic/react/css imports\n\n📦 REQUIRED STRUCTURE:\n- variables.css: All --ion-* CSS custom properties\n- global.css: Typography, spacing utilities, custom component styles\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use hardcoded hex colors in components - use var(--ion-color-*)\n- DO NOT create separate theme files per mode - use CSS variables with :root and .dark selectors\n- DO NOT import global.css before Ionic core styles\n\n🧪 VERIFICATION:\n- npm run build (no CSS errors)\n- Check that both :root and body.dark selectors exist in variables.css",
+        "epicId": "epic-ui-foundation",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/theme/variables.css",
+          "src/theme/global.css"
+        ],
+        "acceptanceCriteria": [
+          "Given the theme files exist, When I inspect :root in variables.css, Then CSS variables for primary, secondary, success, warning, danger, light, medium, dark colors are defined with all variants (base, contrast, shade, tint)",
+          "Given dark mode is needed, When I add class 'dark' to body, Then all --ion-color-* variables switch to dark theme values",
+          "Given typography needs consistency, When I check global.css, Then font-family, font-sizes for h1-h6, and spacing utilities are defined",
+          "Given system preference detection, When user has dark mode OS setting, Then @media (prefers-color-scheme: dark) query applies dark variables automatically"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-2",
+        "title": "Implement ThemeContext and useTheme hook in src/contexts/ and src/hooks/",
+        "description": "Create React Context for managing theme state (light/dark/system). Persist user preference to localStorage. Auto-detect and respect system preference on first load.\n\n🔧 PATTERNS TO USE:\n- Use React.createContext with TypeScript generics for type safety\n- Create ThemeProvider component that wraps children\n- Use useCallback for toggle function to prevent re-renders\n- Use useEffect to sync with localStorage and apply body class\n- Check window.matchMedia('(prefers-color-scheme: dark)') for system detection\n\n📦 REQUIRED STRUCTURE:\n- ThemeContext.tsx: Context, Provider component, ThemeMode type\n- useTheme.ts: Custom hook that consumes context and provides theme, setTheme, toggleTheme\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT store theme in component state without persistence - use localStorage\n- DO NOT directly manipulate document.body.classList outside useEffect\n- DO NOT export context directly - export useTheme hook instead\n\n🧪 VERIFICATION:\n- npm run build (TypeScript compiles)\n- npm run lint (no warnings)",
+        "epicId": "epic-ui-foundation",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/contexts/ThemeContext.tsx",
+          "src/hooks/useTheme.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given ThemeContext exists, When I wrap app with ThemeProvider, Then theme state is accessible to all child components via useTheme hook",
+          "Given user toggles theme, When toggleTheme() is called, Then body class switches between '' and 'dark' and value persists to localStorage key 'theme-preference'",
+          "Given fresh page load with no stored preference, When ThemeProvider initializes, Then it checks window.matchMedia for system preference and applies accordingly",
+          "Given stored preference exists, When ThemeProvider initializes, Then it uses stored value instead of system preference"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-3",
+        "title": "Create AppLayout with TabBar navigation in src/components/layout/",
+        "description": "Build the main app layout shell using IonTabs, IonTabBar, and IonTabButton for bottom navigation. Tabs: Dashboard (home), Friends (people), Goals (flag), Profile (person).\n\n🔧 PATTERNS TO USE:\n- Use IonTabs as container wrapping IonRouterOutlet and IonTabBar\n- Use IonTabButton with tab prop matching route names\n- Use IonIcon with ionicons (home, people, flag, person icons)\n- Use IonLabel for tab text\n- TabBar.tsx is a pure presentational component receiving active tab as prop\n\n📦 REQUIRED STRUCTURE:\n- AppLayout.tsx: Main layout with IonTabs, routes outlet, and TabBar\n- TabBar.tsx: Presentational component with IonTabBar and IonTabButtons\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT put route definitions inside TabBar - keep in AppRouter\n- DO NOT use custom icons initially - use Ionicons from 'ionicons/icons'\n- DO NOT hardcode colors - use Ionic's default tab styling\n\n🧪 VERIFICATION:\n- npm run build (no errors)\n- Visually: TabBar should show 4 tabs with icons and labels",
+        "epicId": "epic-ui-foundation",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/layout/AppLayout.tsx",
+          "src/components/layout/TabBar.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given AppLayout is rendered, When I view the component, Then IonTabs contains IonRouterOutlet and TabBar component",
+          "Given TabBar is rendered, When I view the bottom bar, Then 4 tabs display: Dashboard (home icon), Friends (people icon), Goals (flag icon), Profile (person icon)",
+          "Given a tab is active, When I view TabBar, Then the active tab is visually highlighted using Ionic's default selected styling",
+          "Given tab routing, When tab attribute matches route in IonRouterOutlet, Then clicking tab navigates to corresponding route"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-4",
+        "title": "Setup IonReactRouter with ProtectedRoute in src/router/",
+        "description": "Configure IonReactRouter with route definitions for all app pages. Create ProtectedRoute wrapper that checks auth state and redirects to login if not authenticated. Create placeholder Home page.\n\n🔧 PATTERNS TO USE:\n- Use IonReactRouter from @ionic/react-router as root router\n- Use IonRouterOutlet for rendering routes\n- ProtectedRoute: wrapper component that checks isAuthenticated from context\n- Use Redirect component for unauthenticated users\n- Define routes: /login, /register (public), /dashboard, /friends, /goals, /profile (protected)\n\n📦 REQUIRED STRUCTURE:\n- AppRouter.tsx: Main router with all route definitions\n- ProtectedRoute.tsx: HOC/wrapper for auth-required routes\n- pages/Home.tsx: Simple placeholder page\n\n📦 APP.TSX MODIFICATION:\n- Import AppRouter and render it inside IonApp\n- Import ThemeProvider and wrap IonApp with it\n- Import theme CSS files\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use BrowserRouter - use IonReactRouter for Ionic animations\n- DO NOT check auth inside each page - use ProtectedRoute wrapper\n- DO NOT hardcode redirect path - make it configurable prop\n\n🧪 VERIFICATION:\n- npm run build (routes compile)\n- npm run lint (no warnings)",
+        "epicId": "epic-ui-foundation",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-ui-foundation-story-2",
+          "epic-ui-foundation-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/App.tsx"
+        ],
+        "filesToModify": [
+          "src/App.tsx"
+        ],
+        "filesToCreate": [
+          "src/router/AppRouter.tsx",
+          "src/router/ProtectedRoute.tsx",
+          "src/pages/Home.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given AppRouter is rendered, When routes are defined, Then /login and /register are public routes accessible without auth",
+          "Given ProtectedRoute wraps a route, When user is not authenticated (isAuthenticated=false), Then user is redirected to /login with return URL preserved",
+          "Given ProtectedRoute wraps a route, When user is authenticated (isAuthenticated=true), Then child component renders normally",
+          "Given App.tsx is modified, When app loads, Then ThemeProvider wraps IonApp and AppRouter is rendered inside",
+          "Given placeholder Home page, When /dashboard route loads, Then Home.tsx renders with 'Welcome to Pasos' message"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-5",
+        "title": "Create common UI components: LoadingSpinner, ErrorBoundary, EmptyState",
+        "description": "Build reusable utility components for loading states, error handling, and empty data scenarios using Ionic components.\n\n🔧 PATTERNS TO USE:\n- LoadingSpinner: Wrap IonSpinner with centered container, accept size and color props\n- ErrorBoundary: Class component with componentDidCatch, render fallback UI with retry button\n- EmptyState: Functional component with icon, title, description, optional action button using IonCard\n\n📦 REQUIRED STRUCTURE:\n- LoadingSpinner.tsx: Props { size?: 'small'|'default'|'large', color?: string }\n- ErrorBoundary.tsx: Class component with state { hasError, error }, fallback prop\n- EmptyState.tsx: Props { icon: string, title: string, description?: string, actionLabel?: string, onAction?: () => void }\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use functional component for ErrorBoundary - must be class for componentDidCatch\n- DO NOT hardcode spinner color - use Ionic color prop (primary, secondary, etc.)\n- DO NOT inline styles - use Ionic utility classes or CSS modules\n\n🧪 VERIFICATION:\n- npm run build (TypeScript compiles)\n- npm run lint (no warnings)",
+        "epicId": "epic-ui-foundation",
+        "priority": 5,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/common/LoadingSpinner.tsx",
+          "src/components/common/ErrorBoundary.tsx",
+          "src/components/common/EmptyState.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given LoadingSpinner component, When rendered with default props, Then IonSpinner displays centered in parent container with default size",
+          "Given LoadingSpinner component, When size='large' and color='primary' props passed, Then spinner renders larger with primary color",
+          "Given ErrorBoundary wraps children, When child throws error, Then fallback UI displays error message and retry button",
+          "Given ErrorBoundary retry button, When clicked, Then component attempts to re-render children (resets hasError state)",
+          "Given EmptyState component, When rendered with icon='folder-open', title='No items', Then card displays icon and title centered",
+          "Given EmptyState with action, When actionLabel and onAction provided, Then button displays and calls onAction when clicked"
+        ]
+      },
+      {
+        "id": "epic-ui-foundation-story-6",
+        "title": "Define TypeScript types and interfaces in src/types/",
+        "description": "Create comprehensive type definitions for all app entities matching backend models. Include User, Step, SharingRelationship, GroupGoal, and API response wrappers.\n\n🔧 PATTERNS TO USE:\n- Use interface for object shapes, type for unions/primitives\n- Use generics for API responses: ApiResponse<T> = { data: T, message?: string }\n- Export all types from index.ts barrel file\n- Match field names EXACTLY with backend (camelCase)\n- Use optional properties (?) for nullable fields\n\n📦 REQUIRED TYPES:\n- User: { id, username, email, createdAt, updatedAt }\n- Step: { id, userId, date, stepCount, source, hourlySteps?, createdAt }\n- SharingRelationship: { id, requesterId, targetId, status, createdAt }\n- GroupGoal: { id, name, description?, targetSteps, startDate, endDate, ownerId, members?, progress? }\n- ApiResponse<T>: { success: boolean, data: T, message?: string, error?: string }\n- ApiError: { success: false, error: string, statusCode: number }\n\n⚠️ ANTI-PATTERNS TO AVOID:\n- DO NOT use 'any' type - use proper generics or unknown\n- DO NOT duplicate types - import from index.ts\n- DO NOT use snake_case - backend uses camelCase\n\n🧪 VERIFICATION:\n- npm run build (TypeScript compiles)\n- npm run typecheck (no type errors)",
+        "epicId": "epic-ui-foundation",
+        "priority": 6,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/types/index.ts",
+          "src/types/user.ts",
+          "src/types/step.ts",
+          "src/types/sharing.ts",
+          "src/types/goal.ts",
+          "src/types/api.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given User type exists, When imported from '@/types', Then it has id, username, email, createdAt, updatedAt fields with correct types",
+          "Given Step type exists, When imported, Then it has id, userId, date (string), stepCount (number), source ('manual'|'native'), hourlySteps? (Record<string, number>)",
+          "Given SharingRelationship type exists, When imported, Then it has status field typed as 'pending' | 'accepted' | 'rejected'",
+          "Given GroupGoal type exists, When imported, Then it includes members as optional array of { userId, username, contribution }",
+          "Given ApiResponse generic, When used as ApiResponse<User>, Then data field is typed as User",
+          "Given index.ts barrel, When importing 'from @/types', Then all types are re-exported and accessible"
+        ]
+      }
+    ]
+  }
+}
