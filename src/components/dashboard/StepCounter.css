@@ -1,0 +1,32 @@
+.step-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.step-counter .step-count h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.step-counter .step-label p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.step-details {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.step-details .percentage {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.step-details .remaining {
+  font-size: 0.9rem;
+}

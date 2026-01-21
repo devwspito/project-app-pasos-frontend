@@ -1,0 +1,65 @@
+/**
+ * WeeklyChart component styles
+ */
+
+.weekly-chart {
+  margin: 16px 0;
+}
+
+.weekly-chart ion-card-header {
+  padding-bottom: 8px;
+}
+
+.weekly-chart ion-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.weekly-chart ion-segment {
+  margin-top: 12px;
+  max-width: 200px;
+}
+
+.weekly-chart ion-segment-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-height: 32px;
+}
+
+.weekly-chart .chart-container {
+  height: 200px;
+  width: 100%;
+  position: relative;
+}
+
+.weekly-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--ion-color-medium);
+}
+
+.weekly-chart-empty p {
+  text-align: center;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .weekly-chart .chart-container {
+    height: 250px;
+  }
+
+  .weekly-chart ion-segment {
+    max-width: 240px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .weekly-chart-empty p {
+    color: var(--ion-color-medium-shade);
+  }
+}

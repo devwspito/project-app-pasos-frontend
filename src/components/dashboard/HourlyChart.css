@@ -1,0 +1,70 @@
+.hourly-chart {
+  margin: 0;
+}
+
+.hourly-chart-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hourly-chart-header-row ion-card-title {
+  margin: 0;
+}
+
+.hourly-chart-header-row ion-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 0.875rem;
+}
+
+.hourly-chart-container {
+  height: 200px;
+  width: 100%;
+  position: relative;
+}
+
+.hourly-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ion-color-light);
+}
+
+.hourly-chart-peak-indicator {
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 196, 9, 0.8);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Modal styling for date picker */
+.hourly-chart ion-modal {
+  --width: fit-content;
+  --min-width: 300px;
+  --height: fit-content;
+  --border-radius: 8px;
+}
+
+.hourly-chart ion-modal ion-datetime {
+  --background: var(--ion-background-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 360px) {
+  .hourly-chart-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hourly-chart-container {
+    height: 180px;
+  }
+}
