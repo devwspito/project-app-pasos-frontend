@@ -14,6 +14,7 @@ import Dashboard from '../pages/Dashboard';
 import Friends from '../pages/Friends';
 import Goals from '../pages/Goals';
 import Profile from '../pages/Profile';
+import FriendDetailPage from '../pages/FriendDetailPage';
 
 /**
  * Route configuration for the application.
@@ -33,6 +34,7 @@ const AppRouter: React.FC = () => {
             {/* Protected Routes */}
             <ProtectedRoute exact path="/dashboard" component={Dashboard} />
             <ProtectedRoute exact path="/friends" component={Friends} />
+            <ProtectedRoute exact path="/friends/:friendId" component={FriendDetailPage} />
             <ProtectedRoute exact path="/goals" component={Goals} />
             <ProtectedRoute exact path="/profile" component={Profile} />
 

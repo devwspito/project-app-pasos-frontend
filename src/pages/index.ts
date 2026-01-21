@@ -5,3 +5,4 @@ export { default as Dashboard } from './Dashboard';
 export { default as Friends } from './Friends';
 export { default as Goals } from './Goals';
 export { default as Profile } from './Profile';
+export { default as FriendDetailPage } from './FriendDetailPage';

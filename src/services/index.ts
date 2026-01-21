@@ -14,3 +14,9 @@ export {
   type RecordedStep,
   type RecordStepsData,
 } from './stepsService';
+
+export {
+  sharingService,
+  type FriendStatsData,
+  type FriendWeeklyTrendItem,
+} from './sharingService';
