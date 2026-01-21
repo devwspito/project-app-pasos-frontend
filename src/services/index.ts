@@ -20,3 +20,6 @@ export {
   type FriendStatsResponse,
   type RelationshipsResponse,
 } from './sharingService';
+
+export { apiClient } from './apiClient';
+export { authService, type AuthUser } from './authService';
