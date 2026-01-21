@@ -1,0 +1,189 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-21T03:51:34.166Z",
+    "phase": "techlead",
+    "epicId": "epic-sharing-ui",
+    "savedAt": "2026-01-21T03:51:34.167Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-sharing-ui",
+    "storiesCount": 6,
+    "architecture": "## Architecture Overview\n\nThis epic implements the Friends/Sharing UI feature following existing patterns in the codebase.\n\n### Layer Architecture\n\n```\n┌─────────────────────────────────────────────────────────┐\n│  Pages Layer                                             │\n│  ├─ FriendsPage.tsx (tabs, FAB, orchestrates components)│\n│  └─ FriendDetailPage.tsx (friend stats detail view)     │\n├─────────────────────────────────────────────────────────┤\n│  Components Layer (src/components/sharing/)              │\n│  ├─ FriendsList.tsx + FriendCard.tsx (list display)     │\n│  ├─ PendingRequests.tsx (request management)            │\n│  ├─ AddFriendModal.tsx (user search + add)              │\n│  └─ FriendStatsView.tsx (stats visualization)           │\n├─────────────────────────────────────────────────────────┤\n│  Hooks Layer                                             │\n│  └─ useSharing.ts (state management, actions)           │\n├─────────────────────────────────────────────────────────┤\n│  Services Layer                                          │\n│  └─ sharingService.ts (API calls via axios)             │\n├─────────────────────────────────────────────────────────┤\n│  Types Layer (existing)                                  │\n│  └─ social.types.ts (Friend, FriendRequest, etc.)       │\n└─────────────────────────────────────────────────────────┘\n```\n\n### Data Flow\n\n1. **FriendsPage** uses `useSharing` hook\n2. Hook calls `sharingService` methods\n3. Service makes axios requests to backend `/api/sharing/*` endpoints\n4. Data flows down as props to child components\n5. User actions trigger callbacks passed as props\n6. Callbacks invoke hook methods which update state\n\n### Key Patterns\n\n- **Service Pattern**: Following stepsService.ts - exported const object with axios methods\n- **Hook Pattern**: Following useSteps.ts - useState/useCallback/useEffect\n- **Component Pattern**: Dumb components receive props, don't fetch\n- **Ionic UI**: IonPage, IonSegment, IonFab, IonModal for mobile-native feel\n\n### Verification Commands\n\n```bash\nnpm run typecheck  # Verify TypeScript compilation\nnpm run lint       # Check code quality\nnpm run build      # Verify production build\n```",
+    "stories": [
+      {
+        "id": "epic-sharing-ui-story-1",
+        "title": "Create sharingService.ts and useSharing.ts hook",
+        "description": "Implement the sharing API service and custom hook following existing patterns.\n\n🔧 **PATTERNS TO USE:**\n- Follow `stepsService.ts` pattern: export const object with axios methods\n- Follow `useSteps.ts` pattern: useState for data, useCallback for actions, useEffect for autoFetch\n- Use `ApiResponse<T>` wrapper from `@/types` for typed responses\n- Use existing types from `social.types.ts`: Friend, FriendRequest, FriendshipStatus, UserSearchResult, FriendsSummary\n- Use `API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'`\n\n📦 **SHARING SERVICE ENDPOINTS:**\n- `getRelationships()` → GET /api/sharing/relationships → returns { accepted: Friend[], pending: FriendRequest[] }\n- `sendRequest(userId: string)` → POST /api/sharing/request → { friendshipId }\n- `acceptRequest(friendshipId: string)` → POST /api/sharing/accept → { friendship }\n- `rejectRequest(friendshipId: string)` → POST /api/sharing/reject → { success }\n- `revokeAccess(friendshipId: string)` → DELETE /api/sharing/:friendshipId → { success }\n- `getFriendStats(friendId: string)` → GET /api/sharing/:friendId/stats → step stats data\n- `searchUsers(query: string)` → GET /api/users/search?q=query → UserSearchResult[]\n\n📦 **USESHARING HOOK INTERFACE:**\n```typescript\ninterface UseSharingReturn {\n  friends: Friend[];\n  pendingIncoming: FriendRequest[];\n  pendingOutgoing: FriendRequest[];\n  loading: boolean;\n  error: string | null;\n  refetch: () => Promise<void>;\n  sendRequest: (userId: string) => Promise<boolean>;\n  acceptRequest: (friendshipId: string) => Promise<boolean>;\n  rejectRequest: (friendshipId: string) => Promise<boolean>;\n  revokeAccess: (friendshipId: string) => Promise<boolean>;\n  searchUsers: (query: string) => Promise<UserSearchResult[]>;\n}\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use fetch() directly - use axios like stepsService\n- Do NOT create new type definitions - use existing from social.types.ts\n- Do NOT skip error handling - follow useSteps error pattern",
+        "epicId": "epic-sharing-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/services/stepsService.ts",
+          "src/hooks/useSteps.ts",
+          "src/types/social.types.ts",
+          "src/types/api.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/services/sharingService.ts",
+          "src/hooks/useSharing.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given sharingService is imported, When getRelationships() is called, Then it returns friends and pending requests with proper ApiResponse typing",
+          "Given useSharing hook is used in a component, When the component mounts, Then it fetches relationships and exposes friends/pendingIncoming/pendingOutgoing arrays",
+          "Given useSharing hook, When sendRequest(userId) is called, Then the request is sent and optimistically updates pending list",
+          "Given useSharing hook, When acceptRequest(friendshipId) is called, Then the friend moves from pending to friends list",
+          "Given sharingService, When searchUsers(query) is called, Then it returns UserSearchResult[] from /api/users/search endpoint"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-2",
+        "title": "Create FriendCard.tsx and FriendsList.tsx components",
+        "description": "Create reusable components to display friends list with cards showing friend info and steps.\n\n🔧 **PATTERNS TO USE:**\n- Use Ionic components: IonCard, IonCardContent, IonItem, IonAvatar, IonLabel, IonIcon\n- Import types from `@/types/social.types`: Friend\n- Use component props pattern (receive data, don't fetch)\n- Use EmptyState component from `@/components/common` for empty list\n\n📦 **FRIENDCARD PROPS:**\n```typescript\ninterface FriendCardProps {\n  friend: Friend;\n  onTap: (friend: Friend) => void;\n}\n```\nDisplay: avatar placeholder (IonIcon person), name, stepsToday with footsteps icon\n\n📦 **FRIENDSLIST PROPS:**\n```typescript\ninterface FriendsListProps {\n  friends: Friend[];\n  onFriendTap: (friend: Friend) => void;\n  loading?: boolean;\n}\n```\nRender FriendCard for each friend, show EmptyState when empty\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT fetch data in these components - they receive props\n- Do NOT use custom CSS - use Ionic utility classes\n- Do NOT hardcode strings - use meaningful prop names",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/social.types.ts",
+          "src/components/common/EmptyState.tsx",
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/sharing/FriendCard.tsx",
+          "src/components/sharing/FriendsList.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given FriendCard receives a Friend object, When rendered, Then it displays avatar placeholder, name, and stepsToday with footsteps icon",
+          "Given FriendCard, When tapped, Then onTap callback is invoked with the friend object",
+          "Given FriendsList receives empty array, When rendered, Then EmptyState component is shown with 'No friends yet' message",
+          "Given FriendsList receives friends array, When rendered, Then FriendCard is rendered for each friend in scrollable list"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-3",
+        "title": "Create PendingRequests.tsx component",
+        "description": "Create component showing incoming and outgoing pending friend requests with action buttons.\n\n🔧 **PATTERNS TO USE:**\n- Use Ionic components: IonList, IonItem, IonLabel, IonButton, IonIcon, IonBadge\n- Import FriendRequest type from `@/types/social.types`\n- Use checkmarkCircle and closeCircle icons from ionicons\n- Use EmptyState for empty lists\n\n📦 **PENDINGREQUESTS PROPS:**\n```typescript\ninterface PendingRequestsProps {\n  incoming: FriendRequest[];\n  outgoing: FriendRequest[];\n  onAccept: (friendshipId: string) => void;\n  onReject: (friendshipId: string) => void;\n  onCancel: (friendshipId: string) => void;\n  loading?: boolean;\n}\n```\n\n📦 **UI STRUCTURE:**\n- Section header 'Incoming Requests' with badge count\n- For each incoming: show user name, accept button (green), reject button (red)\n- Section header 'Sent Requests'\n- For each outgoing: show user name, 'Pending' status, cancel button\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT mix incoming/outgoing in same list - separate sections\n- Do NOT fetch data - receive via props\n- Do NOT use alerts for confirmations - handle in parent",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/social.types.ts",
+          "src/components/common/EmptyState.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/sharing/PendingRequests.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given PendingRequests receives incoming requests, When rendered, Then each request shows user name with Accept and Reject buttons",
+          "Given incoming request, When Accept button is clicked, Then onAccept callback is invoked with friendshipId",
+          "Given incoming request, When Reject button is clicked, Then onReject callback is invoked with friendshipId",
+          "Given outgoing request, When displayed, Then it shows 'Pending' status with Cancel button",
+          "Given no pending requests, When rendered, Then appropriate EmptyState is shown"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-4",
+        "title": "Create AddFriendModal.tsx with debounced search",
+        "description": "Create modal component for searching and adding new friends with debounced input.\n\n🔧 **PATTERNS TO USE:**\n- Use Ionic components: IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonSearchbar, IonList, IonItem\n- Import UserSearchResult from `@/types/social.types`\n- Implement debounce with useRef and setTimeout (300ms)\n- Use LoadingSpinner from `@/components/common` during search\n\n📦 **ADDFRIENDMODAL PROPS:**\n```typescript\ninterface AddFriendModalProps {\n  isOpen: boolean;\n  onClose: () => void;\n  onSearch: (query: string) => Promise<UserSearchResult[]>;\n  onSendRequest: (userId: string) => Promise<boolean>;\n}\n```\n\n📦 **INTERNAL STATE:**\n- searchQuery: string\n- searchResults: UserSearchResult[]\n- searching: boolean\n- sendingTo: string | null (userId being sent to)\n\n📦 **UI STRUCTURE:**\n- Modal header with 'Add Friend' title and Close button\n- IonSearchbar with placeholder 'Search by username'\n- Results list showing: name, avatar, Add button (disabled if isFriend or isPending)\n- Success feedback via button text change ('Sent!')\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT search on every keystroke - use 300ms debounce\n- Do NOT allow adding users who are already friends (isFriend=true)\n- Do NOT allow re-sending to pending users (isPending=true)",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/types/social.types.ts",
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/sharing/AddFriendModal.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given AddFriendModal is open, When user types in search, Then search is debounced to 300ms before calling onSearch",
+          "Given search results contain user with isFriend=true, When displayed, Then Add button shows 'Already Friends' and is disabled",
+          "Given search results contain user with isPending=true, When displayed, Then Add button shows 'Pending' and is disabled",
+          "Given search result user, When Add button is clicked, Then onSendRequest is called and button shows 'Sent!' on success",
+          "Given modal, When Close button clicked, Then onClose callback is invoked"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-5",
+        "title": "Create FriendStatsView.tsx and FriendDetailPage.tsx",
+        "description": "Create detail page showing friend's step statistics with weekly chart and stats cards.\n\n🔧 **PATTERNS TO USE:**\n- Use IonPage, IonHeader, IonToolbar, IonBackButton, IonTitle, IonContent\n- Import sharingService for getFriendStats\n- Follow Dashboard layout pattern for stats display\n- Use Chart.js (react-chartjs-2) for weekly chart - same as dashboard\n- Use ProgressRing from `@/components/dashboard` if displaying goal progress\n\n📦 **FRIENDSTATSVIEW PROPS:**\n```typescript\ninterface FriendStatsViewProps {\n  friendName: string;\n  todaySteps: number;\n  weeklyTrend: Array<{ date: string; total: number }>;\n  stats: { today: number; week: number; month: number; allTime: number };\n  dailyGoal?: number;\n}\n```\n\n📦 **FRIENDDETAILPAGE:**\n- Route param: friendId from URL\n- Uses useParams() to get friendId\n- Fetches friend stats via sharingService.getFriendStats(friendId)\n- Renders FriendStatsView with fetched data\n- Shows LoadingSpinner while loading\n- Shows error state if fetch fails\n\n📦 **UI LAYOUT:**\n- Header with back button and friend's name\n- Today's steps with large number display\n- Weekly bar chart showing last 7 days\n- Stats grid: Week total, Month total, All-time total\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT allow editing - this is read-only view of friend's data\n- Do NOT duplicate chart config - extract or reuse from dashboard patterns\n- Do NOT forget IonBackButton for navigation",
+        "epicId": "epic-sharing-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/Dashboard.tsx",
+          "src/components/dashboard/ProgressRing.tsx",
+          "src/services/stepsService.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/sharing/FriendStatsView.tsx",
+          "src/pages/FriendDetailPage.tsx"
+        ],
+        "acceptanceCriteria": [
+          "Given FriendDetailPage with friendId param, When mounted, Then it fetches friend stats via sharingService.getFriendStats",
+          "Given friend stats loaded, When displayed, Then FriendStatsView shows today's steps, weekly chart, and stats grid",
+          "Given FriendStatsView, When weeklyTrend data provided, Then bar chart renders last 7 days of step data",
+          "Given FriendDetailPage, When back button pressed, Then navigation returns to Friends page",
+          "Given FriendDetailPage loading, When stats are being fetched, Then LoadingSpinner is displayed"
+        ]
+      },
+      {
+        "id": "epic-sharing-ui-story-6",
+        "title": "Assemble FriendsPage.tsx with tabs and update AppRouter.tsx",
+        "description": "Create the main FriendsPage with segment tabs, FAB button, and integrate all components. Update router with new routes.\n\n🔧 **PATTERNS TO USE:**\n- Use Ionic: IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonSegment, IonSegmentButton, IonFab, IonFabButton, IonIcon, IonRefresher, IonRefresherContent\n- Use useSharing hook from `@/hooks/useSharing`\n- Use useHistory from react-router-dom for navigation\n- Import all sharing components from their files\n\n📦 **FRIENDSPAGE STRUCTURE:**\n```typescript\nconst FriendsPage: React.FC = () => {\n  const [activeTab, setActiveTab] = useState<'friends' | 'pending'>('friends');\n  const [showAddModal, setShowAddModal] = useState(false);\n  const { friends, pendingIncoming, pendingOutgoing, loading, refetch, ... } = useSharing();\n  const history = useHistory();\n  // ...\n}\n```\n\n📦 **UI STRUCTURE:**\n- Header with 'Friends' title and badge showing pending count\n- IonSegment with 'Friends' and 'Requests' tabs\n- Tab content: FriendsList or PendingRequests based on activeTab\n- IonRefresher for pull-to-refresh calling refetch()\n- IonFab with + button to open AddFriendModal\n- AddFriendModal controlled by showAddModal state\n\n📦 **ROUTER UPDATES (AppRouter.tsx):**\n- Import FriendsPage from '../pages/FriendsPage'\n- Import FriendDetailPage from '../pages/FriendDetailPage'\n- Add route: `<ProtectedRoute exact path=\"/friends\" component={FriendsPage} />`\n- Add route: `<ProtectedRoute exact path=\"/friends/:friendId\" component={FriendDetailPage} />`\n- Remove old Friends import\n\n📦 **CREATE BARREL EXPORT (src/components/sharing/index.ts):**\n```typescript\nexport { FriendCard } from './FriendCard';\nexport { FriendsList } from './FriendsList';\nexport { PendingRequests } from './PendingRequests';\nexport { AddFriendModal } from './AddFriendModal';\nexport { FriendStatsView } from './FriendStatsView';\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT forget to pass callbacks to child components\n- Do NOT forget IonRefresher for pull-to-refresh\n- Do NOT forget to handle navigation to FriendDetailPage on friend tap",
+        "epicId": "epic-sharing-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-sharing-ui-story-1",
+          "epic-sharing-ui-story-2",
+          "epic-sharing-ui-story-3",
+          "epic-sharing-ui-story-4",
+          "epic-sharing-ui-story-5"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/router/AppRouter.tsx",
+          "src/pages/Friends.tsx",
+          "src/hooks/useSharing.ts",
+          "src/components/sharing/FriendsList.tsx",
+          "src/components/sharing/PendingRequests.tsx",
+          "src/components/sharing/AddFriendModal.tsx"
+        ],
+        "filesToModify": [
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToCreate": [
+          "src/pages/FriendsPage.tsx",
+          "src/components/sharing/index.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given FriendsPage, When mounted, Then useSharing hook fetches relationships and displays friends in default tab",
+          "Given FriendsPage, When 'Requests' segment tapped, Then PendingRequests component is displayed with incoming/outgoing requests",
+          "Given FriendsPage, When FAB button tapped, Then AddFriendModal opens",
+          "Given FriendsPage, When friend card tapped, Then navigation goes to /friends/:friendId detail page",
+          "Given FriendsPage, When pull-to-refresh triggered, Then refetch() is called and data reloads",
+          "Given AppRouter, When /friends route accessed, Then FriendsPage component is rendered",
+          "Given AppRouter, When /friends/:friendId route accessed, Then FriendDetailPage component is rendered"
+        ]
+      }
+    ]
+  }
+}
