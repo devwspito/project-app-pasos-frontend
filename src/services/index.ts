@@ -20,3 +20,14 @@ export {
   type FriendStatsResponse,
   type RelationshipsResponse,
 } from './sharingService';
+
+export {
+  goalsService,
+  type UserGoalsData,
+  type CreateGoalData,
+  type GoalDetailsData,
+  type InviteUserData,
+  type JoinGoalData,
+  type LeaveGoalData,
+  type GoalProgressData,
+} from './goalsService';

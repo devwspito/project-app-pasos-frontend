@@ -1,0 +1,140 @@
+/**
+ * GoalProgressBar component styles
+ * Uses CSS transitions for smooth progress animations and Ionic CSS variables for theming
+ */
+
+.goal-progress-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Size variants */
+.goal-progress-bar--small .goal-progress-bar__track {
+  height: 6px;
+}
+
+.goal-progress-bar--small .goal-progress-bar__label {
+  font-size: 0.75rem;
+}
+
+.goal-progress-bar--default .goal-progress-bar__track {
+  height: 10px;
+}
+
+.goal-progress-bar--default .goal-progress-bar__label {
+  font-size: 0.875rem;
+}
+
+.goal-progress-bar--large .goal-progress-bar__track {
+  height: 16px;
+}
+
+.goal-progress-bar--large .goal-progress-bar__label {
+  font-size: 1rem;
+}
+
+/* Label container */
+.goal-progress-bar__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.goal-progress-bar__steps {
+  color: var(--ion-text-color);
+  font-weight: 500;
+}
+
+.goal-progress-bar__badge {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Progress track (background) */
+.goal-progress-bar__track {
+  width: 100%;
+  background-color: var(--ion-color-light);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Progress fill (foreground) */
+.goal-progress-bar__fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.5s ease-in-out, background-color 0.3s ease;
+  will-change: width;
+}
+
+/* Color variants using Ionic CSS variables */
+.goal-progress-bar__fill.progress-danger {
+  background-color: var(--ion-color-danger);
+}
+
+.goal-progress-bar__fill.progress-warning {
+  background-color: var(--ion-color-warning);
+}
+
+.goal-progress-bar__fill.progress-success {
+  background-color: var(--ion-color-success);
+}
+
+.goal-progress-bar__fill.progress-complete {
+  background-color: var(--ion-color-success);
+  animation: goal-progress-complete-pulse 1.5s ease-in-out;
+}
+
+/* Animation keyframes */
+@keyframes goal-progress-complete-pulse {
+  0% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleX(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* Fill animation on mount */
+@keyframes goal-progress-fill {
+  from {
+    width: 0;
+  }
+}
+
+/* Apply fill animation */
+.goal-progress-bar__fill {
+  animation: goal-progress-fill 0.8s ease-out;
+}
+
+/* Screen reader only utility (if not available globally) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .goal-progress-bar__track {
+    background-color: var(--ion-color-step-100, rgba(255, 255, 255, 0.1));
+  }
+}
