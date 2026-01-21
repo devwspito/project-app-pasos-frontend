@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "696fe7aa5864812d909bbf1b",
+    "timestamp": "2026-01-21T06:07:55.239Z",
+    "phase": "judge",
+    "storyId": "epic-sharing-ui-story-4",
+    "savedAt": "2026-01-21T06:07:55.239Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-sharing-ui-story-4",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
