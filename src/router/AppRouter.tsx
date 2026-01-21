@@ -14,6 +14,7 @@ import Dashboard from '../pages/Dashboard';
 import FriendsPage from '../pages/FriendsPage';
 import FriendDetailPage from '../pages/FriendDetailPage';
 import Goals from '../pages/Goals';
+import GoalDetailPage from '../pages/GoalDetailPage';
 import Profile from '../pages/Profile';
 
 /**
@@ -36,6 +37,7 @@ const AppRouter: React.FC = () => {
             <ProtectedRoute exact path="/friends" component={FriendsPage} />
             <ProtectedRoute exact path="/friends/:friendId" component={FriendDetailPage} />
             <ProtectedRoute exact path="/goals" component={Goals} />
+            <ProtectedRoute exact path="/goals/:goalId" component={GoalDetailPage} />
             <ProtectedRoute exact path="/profile" component={Profile} />
 
             {/* Home route - protected, redirects to dashboard */}
