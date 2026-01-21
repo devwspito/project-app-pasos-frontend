@@ -20,3 +20,9 @@ export {
   type FriendStatsResponse,
   type RelationshipsResponse,
 } from './sharingService';
+
+export {
+  goalsService,
+  type GoalsListData,
+  type GoalData,
+} from './goalsService';
