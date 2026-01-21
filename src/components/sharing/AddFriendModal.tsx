@@ -1,169 +1,115 @@
-import { useState, useRef, useCallback } from 'react';
+/**
+ * AddFriendModal component for searching and adding friends.
+ * Features debounced search input and friend request sending.
+ */
+
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   IonModal,
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonButtons,
-  IonButton,
   IonContent,
+  IonButton,
+  IonButtons,
   IonSearchbar,
   IonList,
   IonItem,
   IonAvatar,
   IonLabel,
+  IonSpinner,
+  IonText,
   IonIcon,
 } from '@ionic/react';
-import { person } from 'ionicons/icons';
-import type { UserSearchResult } from '@/types/social.types';
-import { LoadingSpinner } from '@/components/common';
-
-/**
- * Props for AddFriendModal component
- */
-export interface AddFriendModalProps {
-  /** Whether the modal is open */
-  isOpen: boolean;
-  /** Callback when modal is closed */
-  onClose: () => void;
-  /** Callback to search users by query */
-  onSearch: (query: string) => Promise<UserSearchResult[]>;
-  /** Callback to send friend request to a user */
-  onSendRequest: (userId: string) => Promise<boolean>;
-}
+import { personAdd, checkmarkCircle, time, people, search } from 'ionicons/icons';
+import type { UserSearchResult } from '../../types/social.types';
 
 /** Debounce delay in milliseconds */
 const DEBOUNCE_DELAY = 300;
 
+export interface AddFriendModalProps {
+  /** Whether the modal is open */
+  isOpen: boolean;
+  /** Callback to close the modal */
+  onClose: () => void;
+  /** Function to search for users */
+  onSearch: (query: string) => Promise<UserSearchResult[]>;
+  /** Function to send a friend request */
+  onSendRequest: (userId: string) => Promise<boolean>;
+}
+
 /**
- * AddFriendModal - Modal for searching and adding new friends
- *
- * Features:
- * - Debounced search input (300ms)
- * - Search results with user avatar, name, and Add button
- * - Add button disabled for users who are already friends or have pending requests
- * - Button changes to "Sent!" after successful request
- *
- * @example
- * ```tsx
- * <AddFriendModal
- *   isOpen={showAddModal}
- *   onClose={() => setShowAddModal(false)}
- *   onSearch={async (query) => await searchUsers(query)}
- *   onSendRequest={async (userId) => await sendFriendRequest(userId)}
- * />
- * ```
+ * Modal for searching users and sending friend requests
  */
-export function AddFriendModal({
+export const AddFriendModal: React.FC<AddFriendModalProps> = ({
   isOpen,
   onClose,
   onSearch,
   onSendRequest,
-}: AddFriendModalProps) {
-  // Internal state
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [sentRequests, setSentRequests] = useState<Set<string>>(new Set());
 
-  // Ref for debounce timer
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
-   * Perform search with the given query
+   * Perform search with debouncing
    */
-  const performSearch = useCallback(
-    async (query: string) => {
-      if (!query.trim()) {
-        setSearchResults([]);
-        setSearching(false);
-        return;
-      }
+  const performSearch = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
 
-      setSearching(true);
-      try {
-        const results = await onSearch(query.trim());
-        setSearchResults(results);
-      } catch (error) {
-        console.error('Search failed:', error);
-        setSearchResults([]);
-      } finally {
-        setSearching(false);
-      }
-    },
-    [onSearch]
-  );
+    setSearching(true);
+    try {
+      const results = await onSearch(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setSearching(false);
+    }
+  }, [onSearch]);
 
   /**
    * Handle search input change with debounce
    */
-  const handleSearchChange = useCallback(
-    (event: CustomEvent) => {
-      const query = (event.detail.value as string) || '';
-      setSearchQuery(query);
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
 
-      // Clear previous timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-
-      // Set new debounced search
-      debounceTimerRef.current = setTimeout(() => {
-        performSearch(query);
-      }, DEBOUNCE_DELAY);
-    },
-    [performSearch]
-  );
-
-  /**
-   * Handle send friend request
-   */
-  const handleSendRequest = async (userId: string) => {
-    if (sendingTo || sentRequests.has(userId)) {
-      return;
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
 
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      performSearch(value);
+    }, DEBOUNCE_DELAY);
+  }, [performSearch]);
+
+  /**
+   * Handle sending a friend request
+   */
+  const handleSendRequest = async (userId: string) => {
     setSendingTo(userId);
     try {
       const success = await onSendRequest(userId);
       if (success) {
-        setSentRequests((prev) => new Set(prev).add(userId));
+        setSentRequests((prev) => new Set([...prev, userId]));
       }
-    } catch (error) {
-      console.error('Failed to send friend request:', error);
     } finally {
       setSendingTo(null);
     }
   };
 
   /**
-   * Get the button text for a user
-   */
-  const getButtonText = (user: UserSearchResult): string => {
-    if (user.isFriend) {
-      return 'Friends';
-    }
-    if (user.isPending || sentRequests.has(user.id)) {
-      return 'Sent!';
-    }
-    return 'Add';
-  };
-
-  /**
-   * Check if add button should be disabled
-   */
-  const isButtonDisabled = (user: UserSearchResult): boolean => {
-    return (
-      user.isFriend ||
-      user.isPending ||
-      sentRequests.has(user.id) ||
-      sendingTo === user.id
-    );
-  };
-
-  /**
-   * Reset state when modal is closed
+   * Reset state when modal closes
    */
   const handleClose = () => {
     // Clear debounce timer
@@ -176,8 +122,29 @@ export function AddFriendModal({
     setSearching(false);
     setSendingTo(null);
     setSentRequests(new Set());
-    // Call parent close handler
     onClose();
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  /**
+   * Get button text and state for a user
+   */
+  const getButtonState = (user: UserSearchResult) => {
+    if (user.isFriend) {
+      return { text: 'Friends', disabled: true, icon: checkmarkCircle, color: 'success' as const };
+    }
+    if (user.isPending || sentRequests.has(user.id)) {
+      return { text: 'Sent!', disabled: true, icon: time, color: 'medium' as const };
+    }
+    return { text: 'Add', disabled: false, icon: personAdd, color: 'primary' as const };
   };
 
   return (
@@ -190,80 +157,105 @@ export function AddFriendModal({
           </IonButtons>
         </IonToolbar>
       </IonHeader>
+
       <IonContent className="ion-padding">
         <IonSearchbar
           value={searchQuery}
-          onIonInput={handleSearchChange}
-          placeholder="Search by username"
+          onIonInput={(e) => handleSearchChange(e.detail.value || '')}
+          placeholder="Search by name or email..."
           debounce={0}
           animated
-          aria-label="Search for friends by username"
         />
 
-        {searching ? (
-          <div className="search-loading" style={{ padding: '2rem 0' }}>
-            <LoadingSpinner size="default" aria-label="Searching for users" />
+        {searching && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <IonSpinner />
+            <IonText color="medium">
+              <p>Searching...</p>
+            </IonText>
           </div>
-        ) : (
+        )}
+
+        {!searching && searchQuery.length >= 2 && searchResults.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <IonIcon
+              icon={search}
+              style={{ fontSize: '3rem', color: 'var(--ion-color-medium)' }}
+            />
+            <IonText color="medium">
+              <p>No users found for "{searchQuery}"</p>
+            </IonText>
+          </div>
+        )}
+
+        {!searching && searchQuery.length < 2 && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <IonIcon
+              icon={people}
+              style={{ fontSize: '3rem', color: 'var(--ion-color-medium)' }}
+            />
+            <IonText color="medium">
+              <p>Enter at least 2 characters to search</p>
+            </IonText>
+          </div>
+        )}
+
+        {searchResults.length > 0 && (
           <IonList>
-            {searchResults.map((user) => (
-              <IonItem key={user.id} lines="full">
-                <IonAvatar slot="start">
-                  {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={`${user.name}'s avatar`} />
-                  ) : (
-                    <div
-                      className="avatar-placeholder"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'var(--ion-color-light)',
-                      }}
-                    >
-                      <IonIcon icon={person} aria-hidden="true" />
-                    </div>
-                  )}
-                </IonAvatar>
-                <IonLabel>
-                  <h2>{user.name}</h2>
-                </IonLabel>
-                <IonButton
-                  slot="end"
-                  fill={isButtonDisabled(user) ? 'outline' : 'solid'}
-                  size="small"
-                  disabled={isButtonDisabled(user)}
-                  onClick={() => handleSendRequest(user.id)}
-                  aria-label={
-                    user.isFriend
-                      ? `${user.name} is already a friend`
-                      : user.isPending || sentRequests.has(user.id)
-                        ? `Friend request sent to ${user.name}`
-                        : `Send friend request to ${user.name}`
-                  }
-                >
-                  {sendingTo === user.id ? (
-                    <LoadingSpinner size="small" color="primary" />
-                  ) : (
-                    getButtonText(user)
-                  )}
-                </IonButton>
-              </IonItem>
-            ))}
-            {searchQuery.trim() &&
-              !searching &&
-              searchResults.length === 0 && (
-                <IonItem lines="none">
-                  <IonLabel className="ion-text-center" color="medium">
-                    <p>No users found for &quot;{searchQuery}&quot;</p>
+            {searchResults.map((user) => {
+              const buttonState = getButtonState(user);
+              const isProcessing = sendingTo === user.id;
+
+              return (
+                <IonItem key={user.id}>
+                  <IonAvatar slot="start">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          background: 'var(--ion-color-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </IonAvatar>
+
+                  <IonLabel>
+                    <h2>{user.name}</h2>
+                    {user.mutualFriendsCount !== undefined && user.mutualFriendsCount > 0 && (
+                      <p>{user.mutualFriendsCount} mutual friend{user.mutualFriendsCount > 1 ? 's' : ''}</p>
+                    )}
                   </IonLabel>
+
+                  {isProcessing ? (
+                    <IonSpinner slot="end" />
+                  ) : (
+                    <IonButton
+                      slot="end"
+                      size="small"
+                      color={buttonState.color}
+                      disabled={buttonState.disabled}
+                      onClick={() => handleSendRequest(user.id)}
+                    >
+                      <IonIcon icon={buttonState.icon} slot="start" />
+                      {buttonState.text}
+                    </IonButton>
+                  )}
                 </IonItem>
-              )}
+              );
+            })}
           </IonList>
         )}
       </IonContent>
     </IonModal>
   );
-}
+};

@@ -1,115 +1,147 @@
-import { useState, useEffect, useCallback } from 'react';
+/**
+ * FriendDetailPage displays detailed information about a specific friend.
+ * Shows stats, activity history, and friend actions.
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
-  IonBackButton,
   IonButtons,
+  IonBackButton,
+  IonRefresher,
+  IonRefresherContent,
+  IonAvatar,
+  IonSpinner,
+  IonText,
+  RefresherEventDetail,
 } from '@ionic/react';
 import { useParams } from 'react-router-dom';
-import { alertCircleOutline, personOutline } from 'ionicons/icons';
-import { LoadingSpinner, EmptyState } from '@/components/common';
-import { FriendStatsView } from '@/components/sharing';
-import { sharingService, type FriendStatsData } from '@/services/sharingService';
+import { FriendStatsView } from '../components/sharing/FriendStatsView';
+import { useSharing } from '../hooks/useSharing';
+import type { FriendStatsResponse } from '../services/sharingService';
 
-/**
- * Route params for FriendDetailPage
- */
-interface FriendDetailParams {
+interface RouteParams {
   friendId: string;
 }
 
 /**
- * FriendDetailPage - Displays a friend's step statistics
- *
- * Fetches friend stats via sharingService and displays them using FriendStatsView.
- * Shows loading state while fetching and error state if the request fails.
- * Uses IonBackButton for navigation back to the friends list.
- *
- * @route /friends/:friendId
+ * Page component for viewing a friend's detailed profile and stats
  */
 const FriendDetailPage: React.FC = () => {
-  const { friendId } = useParams<FriendDetailParams>();
-  const [friendStats, setFriendStats] = useState<FriendStatsData | null>(null);
+  const { friendId } = useParams<RouteParams>();
+  const { getFriendStats } = useSharing(false);
+  const [stats, setStats] = useState<FriendStatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchFriendStats = useCallback(async () => {
-    if (!friendId) {
-      setError('Friend ID is required');
-      setLoading(false);
-      return;
-    }
+  /**
+   * Fetch friend stats
+   */
+  const fetchStats = useCallback(async () => {
+    if (!friendId) return;
 
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      const response = await sharingService.getFriendStats(friendId);
-
-      if (response.data.success && response.data.data) {
-        setFriendStats(response.data.data);
+      const result = await getFriendStats(friendId);
+      if (result) {
+        setStats(result);
       } else {
-        setError(response.data.message || 'Failed to load friend stats');
+        setError('Unable to load friend data');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      console.error('Failed to fetch friend stats:', err);
-      setError(errorMessage);
+      setError('Failed to load friend data');
+      console.error('Error fetching friend stats:', err);
     } finally {
       setLoading(false);
     }
-  }, [friendId]);
+  }, [friendId, getFriendStats]);
 
+  /**
+   * Handle pull-to-refresh
+   */
+  const handleRefresh = async (event: CustomEvent<RefresherEventDetail>) => {
+    await fetchStats();
+    event.detail.complete();
+  };
+
+  // Fetch on mount
   useEffect(() => {
-    fetchFriendStats();
-  }, [fetchFriendStats]);
+    fetchStats();
+  }, [fetchStats]);
 
-  // Determine page title
-  const pageTitle = friendStats?.friendName || 'Friend Stats';
+  const friendName = stats?.friend?.name || 'Friend';
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/friends" text="" />
+            <IonBackButton defaultHref="/friends" />
           </IonButtons>
-          <IonTitle>{pageTitle}</IonTitle>
+          <IonTitle>{friendName}</IonTitle>
         </IonToolbar>
       </IonHeader>
+
       <IonContent className="ion-padding">
-        {loading && (
-          <LoadingSpinner size="large" aria-label="Loading friend stats" />
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent />
+        </IonRefresher>
+
+        {loading && !stats && (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+            <IonSpinner />
+          </div>
         )}
 
-        {!loading && error && (
-          <EmptyState
-            icon={alertCircleOutline}
-            title="Unable to Load Stats"
-            description={error}
-            actionLabel="Try Again"
-            onAction={fetchFriendStats}
-          />
+        {error && !stats && (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <IonText color="danger">
+              <p>{error}</p>
+            </IonText>
+          </div>
         )}
 
-        {!loading && !error && friendStats && (
-          <FriendStatsView
-            friendName={friendStats.friendName}
-            todaySteps={friendStats.todaySteps}
-            weeklyTrend={friendStats.weeklyTrend}
-            stats={friendStats.stats}
-            dailyGoal={friendStats.dailyGoal}
-          />
-        )}
+        {stats && (
+          <>
+            {/* Friend Header */}
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <IonAvatar style={{ width: '80px', height: '80px', margin: '0 auto' }}>
+                {stats.friend.avatarUrl ? (
+                  <img src={stats.friend.avatarUrl} alt={stats.friend.name} />
+                ) : (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      background: 'var(--ion-color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '2rem',
+                    }}
+                  >
+                    {stats.friend.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </IonAvatar>
+              <h1 style={{ margin: '1rem 0 0.5rem' }}>{stats.friend.name}</h1>
+              <IonText color="medium">
+                <p style={{ margin: 0 }}>
+                  {stats.friend.isActive ? 'Active now' : 'Last active recently'}
+                </p>
+              </IonText>
+            </div>
 
-        {!loading && !error && !friendStats && (
-          <EmptyState
-            icon={personOutline}
-            title="No Data Available"
-            description="Friend stats are not available at this time."
-          />
+            {/* Stats View */}
+            <FriendStatsView stats={stats} loading={loading} />
+          </>
         )}
       </IonContent>
     </IonPage>

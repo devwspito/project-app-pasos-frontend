@@ -17,6 +17,6 @@ export {
 
 export {
   sharingService,
-  type FriendStatsData,
-  type FriendWeeklyTrendItem,
+  type FriendStatsResponse,
+  type RelationshipsResponse,
 } from './sharingService';

@@ -1,75 +1,98 @@
+/**
+ * FriendCard component displays a single friend's information.
+ * Shows avatar, name, steps today, and status indicators.
+ */
+
+import React from 'react';
 import {
-  IonCard,
-  IonCardContent,
   IonItem,
   IonAvatar,
   IonLabel,
+  IonBadge,
   IonIcon,
+  IonNote,
 } from '@ionic/react';
-import { person, footsteps } from 'ionicons/icons';
-import type { Friend } from '@/types/social.types';
+import { chevronForward, footsteps, flame, checkmarkCircle } from 'ionicons/icons';
+import type { Friend } from '../../types/social.types';
 
-/**
- * Props for FriendCard component
- */
 export interface FriendCardProps {
   /** Friend data to display */
   friend: Friend;
-  /** Callback when the card is tapped */
-  onTap: (friend: Friend) => void;
+  /** Click handler for navigation */
+  onClick?: (friend: Friend) => void;
 }
 
 /**
- * FriendCard - Displays a single friend with avatar, name, and step count
- *
- * Uses Ionic components for consistent styling. Shows a placeholder avatar
- * (person icon) when no avatar image is available.
- *
- * @example
- * ```tsx
- * <FriendCard
- *   friend={{ id: '1', name: 'John Doe', stepsToday: 5432, ... }}
- *   onTap={(friend) => navigateToFriendProfile(friend.id)}
- * />
- * ```
+ * Card component for displaying a friend in the friends list
  */
-export function FriendCard({ friend, onTap }: FriendCardProps) {
+export const FriendCard: React.FC<FriendCardProps> = ({ friend, onClick }) => {
   const handleClick = () => {
-    onTap(friend);
+    if (onClick) {
+      onClick(friend);
+    }
   };
 
+  const goalProgress = friend.dailyGoal && friend.dailyGoal > 0
+    ? Math.min(100, Math.round((friend.stepsToday / friend.dailyGoal) * 100))
+    : 0;
+
   return (
-    <IonCard
-      className="friend-card ion-no-margin"
+    <IonItem
       button
+      detail={false}
       onClick={handleClick}
-      role="button"
-      aria-label={`View ${friend.name}'s profile`}
+      className="friend-card"
     >
-      <IonCardContent className="ion-no-padding">
-        <IonItem lines="none" detail={false}>
-          <IonAvatar slot="start" className="friend-avatar">
-            {friend.avatarUrl ? (
-              <img src={friend.avatarUrl} alt={`${friend.name}'s avatar`} />
-            ) : (
-              <div className="avatar-placeholder">
-                <IonIcon icon={person} aria-hidden="true" />
-              </div>
-            )}
-          </IonAvatar>
-          <IonLabel>
-            <h2 className="friend-name">{friend.name}</h2>
-            <p className="friend-steps">
-              <IonIcon
-                icon={footsteps}
-                className="steps-icon"
-                aria-hidden="true"
-              />
-              <span>{friend.stepsToday.toLocaleString()} steps today</span>
-            </p>
-          </IonLabel>
-        </IonItem>
-      </IonCardContent>
-    </IonCard>
+      <IonAvatar slot="start">
+        {friend.avatarUrl ? (
+          <img src={friend.avatarUrl} alt={friend.name} />
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              background: 'var(--ion-color-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+            }}
+          >
+            {friend.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </IonAvatar>
+
+      <IonLabel>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {friend.name}
+          {friend.isActive && (
+            <IonIcon
+              icon={checkmarkCircle}
+              color="success"
+              style={{ fontSize: '0.9rem' }}
+            />
+          )}
+        </h2>
+        <p style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <IonIcon icon={footsteps} color="primary" />
+          {friend.stepsToday.toLocaleString()} steps today
+          {friend.dailyGoal && (
+            <IonNote>({goalProgress}%)</IonNote>
+          )}
+        </p>
+      </IonLabel>
+
+      {friend.currentStreak !== undefined && friend.currentStreak > 0 && (
+        <IonBadge color="warning" slot="end" style={{ marginRight: '0.5rem' }}>
+          <IonIcon icon={flame} style={{ marginRight: '0.25rem' }} />
+          {friend.currentStreak}
+        </IonBadge>
+      )}
+
+      <IonIcon icon={chevronForward} slot="end" color="medium" />
+    </IonItem>
   );
-}
+};
