@@ -1,0 +1,210 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "6970e0492d00873e7f749ae0",
+    "timestamp": "2026-01-21T15:03:55.597Z",
+    "phase": "techlead",
+    "epicId": "epic-auth-ui",
+    "savedAt": "2026-01-21T15:03:55.597Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-auth-ui",
+    "storiesCount": 7,
+    "architecture": "## Auth UI Architecture\n\n### Layer Structure (following existing patterns)\n\n1. **Services Layer** (src/services/)\n   - apiClient.ts: Centralized axios instance with interceptors\n   - authService.ts: Auth API methods following stepsService pattern\n   - index.ts: Barrel exports for all services\n\n2. **Utils Layer** (src/utils/)\n   - tokenStorage.ts: Capacitor Preferences wrapper for token persistence\n\n3. **Context Layer** (src/contexts/)\n   - AuthContext.tsx: Updated to use real authService\n\n4. **Components Layer** (src/components/auth/)\n   - LoginForm.tsx: Reusable login form with validation\n   - RegisterForm.tsx: Reusable registration form with validation\n   - index.ts: Barrel exports\n\n5. **Pages Layer** (src/pages/)\n   - Login.tsx: Uses LoginForm, connects to AuthContext\n   - Register.tsx: Uses RegisterForm, connects to AuthContext\n\n### Data Flow\n```\nPage → Form → useAuth → AuthContext → authService → apiClient → Backend API\n                                            ↓\n                                      tokenStorage\n```\n\n### Security Considerations\n- Tokens stored via Capacitor Preferences (encrypted on native)\n- Auto token refresh on 401 responses\n- Tokens cleared on logout\n\n### Setup Commands\n```bash\nnpm install\n```\n\n### Verification Commands\n- Typecheck: `npm run typecheck`\n- Test: `npm test` (if tests exist)\n- Lint: `npm run lint`",
+    "stories": [
+      {
+        "id": "epic-auth-ui-story-1",
+        "title": "Create apiClient.ts with axios interceptors in src/services/apiClient.ts",
+        "description": "Create centralized axios instance with base URL config, auth header injection, and 401 response handling.\n\n🔧 **PATTERNS TO USE:**\n- Follow stepsService.ts pattern: `const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'`\n- Use axios instance with request/response interceptors\n- Export typed request methods matching existing service pattern\n\n📦 **REQUIRED STRUCTURE:**\n- Request interceptor: Add Authorization header from tokenStorage\n- Response interceptor: Handle 401 errors and attempt token refresh\n- Export apiClient instance and typed methods (get, post, put, delete)\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Direct axios imports in other files - use apiClient instead\n- Hardcoded API URLs - use VITE_API_URL env variable\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/services/stepsService.ts",
+          "src/types/api.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/services/apiClient.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given apiClient is imported, When making a request with stored token, Then Authorization header is automatically added",
+          "Given a 401 response is received, When interceptor catches it, Then token refresh is attempted before failing",
+          "Given VITE_API_URL is set, When apiClient makes requests, Then it uses the configured base URL"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-2",
+        "title": "Create tokenStorage.ts utility with Capacitor Preferences in src/utils/tokenStorage.ts",
+        "description": "Create utility for secure token storage using Capacitor Preferences plugin with web fallback to localStorage.\n\n🔧 **PATTERNS TO USE:**\n- Follow existing utils pattern (see src/utils/platform.ts, src/utils/health.ts)\n- Use @capacitor/preferences for native storage\n- Provide web fallback using localStorage\n- Export named functions: getToken, setTokens, clearTokens, getRefreshToken\n\n📦 **REQUIRED STRUCTURE:**\n```typescript\nexport const tokenStorage = {\n  getToken: async (): Promise<string | null> => {...},\n  getRefreshToken: async (): Promise<string | null> => {...},\n  setTokens: async (accessToken: string, refreshToken: string): Promise<void> => {...},\n  clearTokens: async (): Promise<void> => {...}\n};\n```\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Direct localStorage usage without Capacitor fallback\n- Synchronous token access - always use async/await\n- Storing tokens in memory only\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 1,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/utils/platform.ts",
+          "package.json"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/utils/tokenStorage.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given the app runs on native platform, When setTokens is called, Then tokens are stored via Capacitor Preferences",
+          "Given the app runs on web, When setTokens is called, Then tokens are stored via localStorage fallback",
+          "Given tokens are stored, When getToken is called, Then the access token is returned",
+          "Given clearTokens is called, When checking storage, Then all auth tokens are removed"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-3",
+        "title": "Create authService.ts with real API calls in src/services/authService.ts",
+        "description": "Implement authService with login, register, refreshToken, logout, and getCurrentUser methods calling backend auth endpoints.\n\n🔧 **PATTERNS TO USE:**\n- Follow stepsService.ts object pattern exactly\n- Use apiClient from src/services/apiClient.ts (NOT raw axios)\n- Use types from src/types/api.ts: AuthResponse, LoginPayload, RegisterPayload\n- Export as named export: `export const authService = {...}`\n\n📦 **REQUIRED API CALLS:**\n- login(email, password): POST /api/auth/login → stores tokens via tokenStorage\n- register(username, email, password): POST /api/auth/register → stores tokens\n- refreshToken(): POST /api/auth/refresh → updates stored tokens\n- logout(): Clears stored tokens (no API call needed)\n- getCurrentUser(): GET /api/auth/me → returns current user\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Using raw axios instead of apiClient\n- Forgetting to store tokens after successful login/register\n- Not exporting from services/index.ts\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-1",
+          "epic-auth-ui-story-2"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/services/stepsService.ts",
+          "src/types/api.ts",
+          "src/services/index.ts"
+        ],
+        "filesToModify": [
+          "src/services/index.ts"
+        ],
+        "filesToCreate": [
+          "src/services/authService.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given valid credentials, When login() is called, Then POST /api/auth/login is called and tokens are stored",
+          "Given valid registration data, When register() is called, Then POST /api/auth/register is called and tokens are stored",
+          "Given a stored refresh token, When refreshToken() is called, Then POST /api/auth/refresh updates the access token",
+          "Given logout() is called, When checking tokenStorage, Then all tokens are cleared",
+          "Given authService is exported from services/index.ts, When importing, Then named import works"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-4",
+        "title": "Create LoginForm component with validation in src/components/auth/LoginForm.tsx",
+        "description": "Create reusable LoginForm component with email and password inputs, client-side validation, loading state, and error display using Ionic components.\n\n🔧 **PATTERNS TO USE:**\n- Follow component pattern from src/components/sharing/FriendCard.tsx\n- Use Ionic form components: IonInput, IonItem, IonLabel, IonButton\n- Export named component and Props type\n- Use CSS module pattern (separate .css file)\n\n📦 **REQUIRED STRUCTURE:**\n```typescript\nexport interface LoginFormProps {\n  onSubmit: (email: string, password: string) => Promise<void>;\n  isLoading?: boolean;\n  error?: string | null;\n}\n\nexport const LoginForm: React.FC<LoginFormProps> = ({...}) => {...}\n```\n\n📦 **VALIDATION RULES:**\n- Email: Required, valid email format\n- Password: Required, min 6 characters\n- Show inline validation errors\n- Disable submit while loading\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Using native HTML inputs instead of Ionic components\n- Not exporting Props type\n- Hardcoding auth logic - use onSubmit callback\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/FriendCard.tsx",
+          "src/components/sharing/AddFriendModal.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/auth/LoginForm.tsx",
+          "src/components/auth/LoginForm.css"
+        ],
+        "acceptanceCriteria": [
+          "Given the LoginForm renders, When user enters invalid email, Then validation error is shown inline",
+          "Given the LoginForm renders, When password is less than 6 chars, Then validation error is shown",
+          "Given isLoading is true, When rendering, Then submit button shows loading state and is disabled",
+          "Given valid credentials entered, When submit is clicked, Then onSubmit callback is called with email and password",
+          "Given error prop is set, When rendering, Then error message is displayed"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-5",
+        "title": "Create RegisterForm component and auth barrel export in src/components/auth/",
+        "description": "Create reusable RegisterForm component with username, email, password, confirm password inputs, validation, and error display. Also create barrel export file for auth components.\n\n🔧 **PATTERNS TO USE:**\n- Follow exact pattern from src/components/sharing/index.ts for barrel export\n- Follow component pattern from LoginForm (created in story-4)\n- Use Ionic form components: IonInput, IonItem, IonLabel, IonButton\n- Export named component and Props type\n\n📦 **REQUIRED STRUCTURE - RegisterForm:**\n```typescript\nexport interface RegisterFormProps {\n  onSubmit: (username: string, email: string, password: string) => Promise<void>;\n  isLoading?: boolean;\n  error?: string | null;\n}\n\nexport const RegisterForm: React.FC<RegisterFormProps> = ({...}) => {...}\n```\n\n📦 **REQUIRED STRUCTURE - index.ts (barrel export):**\n```typescript\nexport { LoginForm } from './LoginForm';\nexport type { LoginFormProps } from './LoginForm';\nexport { RegisterForm } from './RegisterForm';\nexport type { RegisterFormProps } from './RegisterForm';\n```\n\n📦 **VALIDATION RULES:**\n- Username: Required, 3-20 characters\n- Email: Required, valid email format\n- Password: Required, min 8 chars, one uppercase, one number\n- Confirm Password: Must match password\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Using default exports instead of named exports\n- Not matching password confirmation\n- Creating index.ts without LoginForm export\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-4"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/index.ts",
+          "src/components/auth/LoginForm.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/auth/RegisterForm.tsx",
+          "src/components/auth/RegisterForm.css",
+          "src/components/auth/index.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given the RegisterForm renders, When username is less than 3 chars, Then validation error is shown",
+          "Given the RegisterForm renders, When passwords don't match, Then validation error is shown",
+          "Given password doesn't meet requirements, When validating, Then specific requirement errors are shown",
+          "Given valid data entered, When submit is clicked, Then onSubmit callback is called with username, email, password",
+          "Given auth/index.ts exists, When importing from '@/components/auth', Then LoginForm and RegisterForm are available"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-6",
+        "title": "Update AuthContext.tsx with real authService integration",
+        "description": "Refactor AuthContext to use authService instead of simulated login, add token refresh logic, persist auth state on app restart.\n\n🔧 **PATTERNS TO USE:**\n- Keep existing AuthContext structure and types\n- Import authService from src/services/authService.ts\n- Import tokenStorage from src/utils/tokenStorage.ts\n- Use useEffect for initial token check on mount\n\n📦 **REQUIRED CHANGES TO AuthContext.tsx:**\n1. Import authService and tokenStorage\n2. Update login() to call authService.login()\n3. Update register() to call authService.register()\n4. Update logout() to call authService.logout()\n5. Add useEffect to check token on mount and load user\n6. Add error state for auth errors\n\n📦 **REQUIRED CHANGES TO useAuth.ts (if needed):**\n- Add error to returned type if adding error state\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Removing existing AuthContextType interface (extend it)\n- Direct API calls - use authService methods\n- Synchronous token checks - use async/await\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 4,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-auth-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/contexts/AuthContext.tsx",
+          "src/hooks/useAuth.ts",
+          "src/services/authService.ts"
+        ],
+        "filesToModify": [
+          "src/contexts/AuthContext.tsx",
+          "src/hooks/useAuth.ts"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given user calls login(), When authService.login() succeeds, Then user state is updated and tokens are stored",
+          "Given user calls register(), When authService.register() succeeds, Then user state is updated and tokens are stored",
+          "Given user calls logout(), When authService.logout() is called, Then user state is cleared and tokens are removed",
+          "Given app mounts with stored token, When AuthProvider initializes, Then user is loaded automatically",
+          "Given token refresh fails, When 401 is received, Then user is logged out"
+        ]
+      },
+      {
+        "id": "epic-auth-ui-story-7",
+        "title": "Update Login.tsx and Register.tsx pages with form components",
+        "description": "Integrate LoginForm and RegisterForm components into Login.tsx and Register.tsx pages, handle navigation on success, display loading and error states.\n\n🔧 **PATTERNS TO USE:**\n- Import forms from '@/components/auth' (barrel export)\n- Use useHistory for navigation after success\n- Use useAuth hook for login/register calls\n- Handle errors from AuthContext\n\n📦 **REQUIRED CHANGES TO Login.tsx:**\n1. Import { LoginForm } from '../components/auth'\n2. Replace demo button with LoginForm component\n3. Create handleLogin that calls auth.login() and navigates on success\n4. Pass isLoading and error from useAuth to LoginForm\n5. Keep link to register page\n\n📦 **REQUIRED CHANGES TO Register.tsx:**\n1. Import { RegisterForm } from '../components/auth'\n2. Replace demo button with RegisterForm component\n3. Create handleRegister that calls auth.register() and navigates on success\n4. Pass isLoading and error from useAuth to RegisterForm\n5. Keep link to login page\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Direct authService calls - use useAuth hook\n- Removing IonPage/IonHeader structure\n- Navigation before auth completes\n\n🧪 **VERIFICATION:**\n```bash\nnpm run typecheck\nnpm run lint\n```",
+        "epicId": "epic-auth-ui",
+        "priority": 5,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-auth-ui-story-5",
+          "epic-auth-ui-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/Login.tsx",
+          "src/pages/Register.tsx",
+          "src/components/auth/index.ts"
+        ],
+        "filesToModify": [
+          "src/pages/Login.tsx",
+          "src/pages/Register.tsx"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given Login page renders, When LoginForm is displayed, Then email and password inputs are visible",
+          "Given valid login credentials, When form is submitted, Then user is redirected to /dashboard",
+          "Given Register page renders, When RegisterForm is displayed, Then all registration inputs are visible",
+          "Given valid registration data, When form is submitted, Then user is redirected to /dashboard",
+          "Given auth error occurs, When form displays, Then error message is shown to user"
+        ]
+      }
+    ]
+  }
+}
