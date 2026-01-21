@@ -1,0 +1,91 @@
+/**
+ * GoalMembersList component styles
+ */
+
+.goal-members-container {
+  width: 100%;
+}
+
+.goal-members-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.goal-members-count {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.goal-members-invite-btn {
+  --padding-start: 0.75rem;
+  --padding-end: 0.75rem;
+}
+
+.goal-members-list {
+  background: transparent;
+}
+
+.goal-member-item {
+  --padding-start: 1rem;
+  --padding-end: 1rem;
+  --inner-padding-end: 0.5rem;
+}
+
+.goal-member-avatar {
+  margin-right: 0.75rem;
+}
+
+.goal-member-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+  border-radius: 50%;
+}
+
+.goal-member-username {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ion-text-color);
+}
+
+.goal-member-contribution {
+  font-size: 0.875rem;
+  color: var(--ion-color-medium);
+  margin-top: 0.25rem;
+}
+
+.goal-member-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  text-transform: capitalize;
+}
+
+/* Empty state styles */
+.goal-members-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.goal-members-empty-icon {
+  font-size: 4rem;
+  color: var(--ion-color-medium);
+  margin-bottom: 1rem;
+}
+
+.goal-members-empty p {
+  margin: 0 0 1rem 0;
+}
