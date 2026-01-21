@@ -11,7 +11,8 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
-import Friends from '../pages/Friends';
+import FriendsPage from '../pages/FriendsPage';
+import FriendDetailPage from '../pages/FriendDetailPage';
 import Goals from '../pages/Goals';
 import Profile from '../pages/Profile';
 
@@ -32,7 +33,8 @@ const AppRouter: React.FC = () => {
 
             {/* Protected Routes */}
             <ProtectedRoute exact path="/dashboard" component={Dashboard} />
-            <ProtectedRoute exact path="/friends" component={Friends} />
+            <ProtectedRoute exact path="/friends" component={FriendsPage} />
+            <ProtectedRoute exact path="/friends/:friendId" component={FriendDetailPage} />
             <ProtectedRoute exact path="/goals" component={Goals} />
             <ProtectedRoute exact path="/profile" component={Profile} />
 
