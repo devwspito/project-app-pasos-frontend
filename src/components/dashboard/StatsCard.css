@@ -1,0 +1,31 @@
+.stats-grid {
+  padding: 0;
+}
+
+.stat-item {
+  margin: 4px;
+}
+
+.stat-item ion-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px;
+}
+
+.stat-item .stat-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.stat-item .stat-value h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-item .stat-label p {
+  font-size: 0.75rem;
+  margin: 4px 0 0;
+}
