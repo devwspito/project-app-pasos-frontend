@@ -19,6 +19,7 @@ import {
   IonFabButton,
   RefresherEventDetail,
 } from '@ionic/react';
+import { useHistory } from 'react-router-dom';
 import { add, flagOutline } from 'ionicons/icons';
 import { useGoals } from '../hooks/useGoals';
 import { CreateGoalModal, GoalCard } from '../components/goals';
@@ -31,6 +32,7 @@ import type { CreateGoalInput, Goal } from '../types/goal.types';
  */
 const Goals: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const history = useHistory();
   const {
     goals,
     loading,
@@ -65,10 +67,8 @@ const Goals: React.FC = () => {
    * Handle goal card click - navigate to detail
    */
   const handleGoalClick = useCallback((goal: Goal) => {
-    // Navigation to goal detail would go here
-    // For now, log the click
-    console.log('Goal clicked:', goal.id);
-  }, []);
+    history.push(`/goals/${goal.id}`);
+  }, [history]);
 
   /**
    * Open create modal
