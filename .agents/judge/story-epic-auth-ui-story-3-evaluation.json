@@ -1,0 +1,17 @@
+{
+  "_metadata": {
+    "agentType": "judge",
+    "taskId": "6970e0492d00873e7f749ae0",
+    "timestamp": "2026-01-21T15:28:48.816Z",
+    "phase": "judge",
+    "storyId": "epic-auth-ui-story-3",
+    "savedAt": "2026-01-21T15:28:48.816Z",
+    "version": "1.0"
+  },
+  "data": {
+    "judgeType": "developer",
+    "entityId": "epic-auth-ui-story-3",
+    "verdict": "approved",
+    "feedback": "Code approved - meets all quality standards"
+  }
+}
