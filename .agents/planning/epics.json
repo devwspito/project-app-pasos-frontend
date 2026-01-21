@@ -1,1169 +1,716 @@
 {
   "_metadata": {
     "agentType": "planning",
-    "taskId": "696fe7aa5864812d909bbf1b",
-    "timestamp": "2026-01-20T20:42:58.495Z",
+    "taskId": "6970e0492d00873e7f749ae0",
+    "timestamp": "2026-01-21T14:24:32.061Z",
     "phase": "planning",
-    "savedAt": "2026-01-20T20:42:58.496Z",
+    "savedAt": "2026-01-21T14:24:32.061Z",
     "version": "1.0"
   },
   "data": {
-    "taskTitle": "MVP Frontend APP pasos",
-    "taskDescription": "Completar los 9 epics del frontend de la aplicación \"Pasos\" (contador de pasos social).\n\n## Contexto\n- El backend ya está completo en: project-app-pasos-backend\n- El frontend debe ir en: project-app-pasos-frontend (ya existe estructura inicial)\n- Usar React + Ionic + Capacitor para aplicación móvil híbrida\n\n## Epics a implementar\n1. **Frontend Foundation** - Setup de React + Ionic + estructura del proyecto\n2. **Capacitor Config** - Configuración para iOS/Android (Health/Fitness APIs)\n3. **UI Foundation** - Sistema de diseño, routing, tema oscuro/claro\n4. **Auth UI** - Login, registro, recuperación de contraseña\n5. **Dashboard** - Vista principal con contador, historial, gráficos\n6. **Sharing UI** - Gestión de compartir datos con amigos\n7. **Goals UI** - Grupos y metas compartidas\n8. **Native Integration** - Integración con podómetro nativo (Health/Google Fit)\n9. **Real-time Client** - WebSocket para actualizaciones en tiempo real\n\n## Repositorios\n- Target: project-app-pasos-frontend (React + Ionic)\n- Conecta con: project-app-pasos-backend (Express API ya implementada)\n\n## Notas técnicas\n- Backend API disponible en: http://localhost:3000/api\n- Endpoints de auth: /api/auth/register, /api/auth/login, /api/auth/logout\n- WebSocket server: ws://localhost:3000",
-    "epicsCount": 9,
+    "taskTitle": "Create finaly implement",
+    "taskDescription": "Necesito que revises todo el codigo del frontend y backend por si hay cosas que mejorar de cara a tener una version completamente funciona, y completar estas tareas que faltaron:\n\n✅ Estado Final - GitHub main\nArchivos subidos exitosamente:\n* StepCounter.tsx + .css ✅\n* WeeklyChart.tsx + .css ✅\n* HourlyChart.tsx + .css ✅\n* index.ts actualizado con todos los exports ✅\nResumen de src/ en main (70 archivos):\nCarpeta\tArchivos\ncomponents/common/\tEmptyState, ErrorBoundary, LoadingSpinner\ncomponents/dashboard/\tProgressRing, StatsCard, StepCounter, WeeklyChart, HourlyChart\ncomponents/layout/\tAppLayout, TabBar\ncomponents/sharing/\tAddFriendModal, FriendCard, FriendStatsView, FriendsList, PendingRequests\ncontexts/\tAuthContext, ThemeContext\nhooks/\tuseAuth, useSharing, useSteps, useTheme\npages/\tDashboard, FriendDetailPage, Friends, FriendsPage, Goals, Home, Login, Profile, Register\nrouter/\tAppRouter, ProtectedRoute\nservices/\tsharingService, stepsService\ntheme/\tglobal.css, variables.css\ntypes/\t14 archivos de tipos\nutils/\thealth.ts, platform.ts\nLo que falta por implementar (según execution-summary.md):\n* ⬜ Epic Auth UI (5 stories - api service, authService real, validación forms)\n* ⬜ Epic Goals UI (0 stories definidas)\n* ⬜ Epic Native Integration\n* ⬜ Epic Realtime Client",
+    "epicsCount": 5,
     "epics": [
       {
-        "id": "epic-frontend-foundation",
-        "title": "Frontend Foundation - React + Ionic Setup",
-        "description": "Initialize the React + Ionic + TypeScript project with all necessary dependencies, build tooling, linting, and project structure. This is the foundation all other epics depend on.",
+        "id": "epic-auth-ui",
+        "title": "Complete Auth UI with Real API Integration",
+        "description": "Implement real authentication forms in Login and Register pages, create authService for API calls, update AuthContext to use real backend, add token storage with Capacitor Preferences, implement axios interceptors for auth headers and token refresh",
         "targetRepository": "project-app-pasos-frontend",
         "affectedRepositories": [
           "project-app-pasos-frontend"
         ],
-        "filesToModify": [],
-        "filesToCreate": [
-          "package.json",
-          "tsconfig.json",
-          "tsconfig.node.json",
-          "vite.config.ts",
-          "index.html",
-          ".eslintrc.cjs",
-          ".prettierrc",
-          "src/main.tsx",
-          "src/App.tsx",
-          "src/vite-env.d.ts",
-          "src/index.css"
+        "filesToModify": [
+          "src/contexts/AuthContext.tsx",
+          "src/pages/Login.tsx",
+          "src/pages/Register.tsx",
+          "src/services/index.ts",
+          "src/hooks/useAuth.ts"
         ],
-        "filesToRead": [],
+        "filesToCreate": [
+          "src/services/authService.ts",
+          "src/services/apiClient.ts",
+          "src/utils/tokenStorage.ts",
+          "src/components/auth/LoginForm.tsx",
+          "src/components/auth/LoginForm.css",
+          "src/components/auth/RegisterForm.tsx",
+          "src/components/auth/RegisterForm.css",
+          "src/components/auth/index.ts"
+        ],
+        "filesToRead": [
+          "src/types/api.ts",
+          "src/contexts/AuthContext.tsx"
+        ],
         "estimatedComplexity": "moderate",
         "dependencies": [],
         "executionOrder": 1,
         "followsPatterns": [
-          "Standard Vite + React + TypeScript setup",
-          "Ionic React integration pattern"
+          "Uses existing ApiResponse types",
+          "Service pattern matches stepsService",
+          "Hook pattern matches useAuth"
         ],
         "stories": [
           {
-            "id": "story-fe-001",
-            "title": "Create package.json with React + Ionic dependencies",
-            "description": "Initialize package.json with all required dependencies: react, react-dom, @ionic/react, @ionic/react-router, react-router-dom, axios, socket.io-client, chart.js, react-chartjs-2, date-fns. Dev deps: typescript, vite, @vitejs/plugin-react, eslint, prettier, @types/*.",
+            "id": "story-auth-1",
+            "title": "Create apiClient with axios interceptors",
+            "description": "Create centralized axios instance with base URL config, auth header injection from stored token, and 401 response interceptor for token refresh",
             "filesToCreate": [
-              "package.json"
+              "src/services/apiClient.ts"
+            ],
+            "filesToModify": [],
+            "acceptanceCriteria": [
+              "Axios instance created with VITE_API_URL base",
+              "Request interceptor adds Authorization header",
+              "Response interceptor handles 401 and attempts token refresh",
+              "Exports typed request methods"
             ],
             "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "package.json contains all required dependencies",
-              "npm install succeeds without errors",
-              "Scripts defined: dev, build, preview, lint, typecheck"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-fe-002",
-            "title": "Configure TypeScript and build tooling",
-            "description": "Create tsconfig.json with strict mode, path aliases (@/*), and Vite configuration for React + Ionic development.",
+            "id": "story-auth-2",
+            "title": "Create tokenStorage utility",
+            "description": "Create utility for secure token storage using Capacitor Preferences plugin with web fallback to localStorage",
             "filesToCreate": [
-              "tsconfig.json",
-              "tsconfig.node.json",
-              "vite.config.ts"
+              "src/utils/tokenStorage.ts"
+            ],
+            "filesToModify": [],
+            "acceptanceCriteria": [
+              "getToken() retrieves stored access token",
+              "setTokens() stores access and refresh tokens",
+              "clearTokens() removes all auth tokens",
+              "Works on both native and web platforms"
             ],
             "priority": 2,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "TypeScript compiles without errors",
-              "Path aliases work (@/components, @/hooks, etc.)",
-              "Vite dev server starts successfully"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-fe-003",
-            "title": "Setup ESLint and Prettier",
-            "description": "Configure ESLint for TypeScript + React with Prettier integration. Include Ionic-specific rules.",
+            "id": "story-auth-3",
+            "title": "Create authService with real API calls",
+            "description": "Implement authService with login, register, refreshToken, logout, and getCurrentUser methods calling backend auth endpoints",
             "filesToCreate": [
-              ".eslintrc.cjs",
-              ".prettierrc",
-              ".eslintignore"
-            ],
-            "priority": 3,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "npm run lint passes",
-              "Prettier formats code consistently",
-              "No conflicts between ESLint and Prettier"
-            ]
-          },
-          {
-            "id": "story-fe-004",
-            "title": "Create entry point and App shell",
-            "description": "Create main.tsx entry point, App.tsx with IonApp wrapper, and base index.html with Ionic viewport meta tags.",
-            "filesToCreate": [
-              "index.html",
-              "src/main.tsx",
-              "src/App.tsx",
-              "src/vite-env.d.ts",
-              "src/index.css"
-            ],
-            "priority": 4,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "App renders without errors",
-              "Ionic styles are applied",
-              "Dev server shows blank Ionic app"
-            ]
-          }
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-capacitor-config",
-        "title": "Capacitor Configuration - Native Platform Setup",
-        "description": "Configure Capacitor for iOS and Android builds with necessary plugins for health data access, status bar control, and splash screen.",
-        "targetRepository": "project-app-pasos-frontend",
-        "affectedRepositories": [
-          "project-app-pasos-frontend"
-        ],
-        "filesToModify": [
-          "package.json"
-        ],
-        "filesToCreate": [
-          "capacitor.config.ts",
-          "android/.gitkeep",
-          "ios/.gitkeep",
-          "src/utils/platform.ts"
-        ],
-        "filesToRead": [],
-        "estimatedComplexity": "moderate",
-        "dependencies": [
-          "epic-frontend-foundation",
-          "epic-frontend-foundation"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "Capacitor official setup guide",
-          "Platform-specific configuration"
-        ],
-        "stories": [
-          {
-            "id": "story-cap-001",
-            "title": "Install and configure Capacitor core",
-            "description": "Add @capacitor/core, @capacitor/cli, @capacitor/android, @capacitor/ios to package.json. Create capacitor.config.ts with app ID, name, and webDir settings.",
-            "filesToModify": [
-              "package.json"
-            ],
-            "filesToCreate": [
-              "capacitor.config.ts"
-            ],
-            "priority": 1,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "npx cap init succeeds",
-              "capacitor.config.ts has correct appId",
-              "webDir points to dist folder"
-            ]
-          },
-          {
-            "id": "story-cap-002",
-            "title": "Add Capacitor native plugins",
-            "description": "Install @capacitor/status-bar, @capacitor/splash-screen, @capacitor/preferences (for local storage), @capacitor/app (lifecycle), @capacitor/network (connectivity).",
-            "filesToModify": [
-              "package.json"
-            ],
-            "filesToCreate": [
-              "src/utils/platform.ts"
-            ],
-            "priority": 2,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "All plugins install without errors",
-              "Platform utility detects native vs web",
-              "Plugins are importable in code"
-            ]
-          },
-          {
-            "id": "story-cap-003",
-            "title": "Configure Health plugin for step data",
-            "description": "Install @nickreid/capacitor-health plugin for HealthKit (iOS) and Google Fit (Android) integration. Create configuration for required permissions.",
-            "filesToModify": [
-              "package.json",
-              "capacitor.config.ts"
-            ],
-            "filesToCreate": [
-              "src/plugins/health.ts"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Health plugin installed",
-              "Permission strings defined for iOS Info.plist",
-              "Android manifest permissions documented"
-            ]
-          }
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-ui-foundation",
-        "title": "UI Foundation - Design System and Routing",
-        "description": "Establish the design system with Ionic components, implement routing with protected routes, and create the theme system with dark/light mode support.",
-        "targetRepository": "project-app-pasos-frontend",
-        "affectedRepositories": [
-          "project-app-pasos-frontend"
-        ],
-        "filesToModify": [
-          "src/App.tsx"
-        ],
-        "filesToCreate": [
-          "src/theme/variables.css",
-          "src/theme/global.css",
-          "src/contexts/ThemeContext.tsx",
-          "src/hooks/useTheme.ts",
-          "src/components/layout/AppLayout.tsx",
-          "src/components/layout/TabBar.tsx",
-          "src/components/common/LoadingSpinner.tsx",
-          "src/components/common/ErrorBoundary.tsx",
-          "src/router/AppRouter.tsx",
-          "src/router/ProtectedRoute.tsx",
-          "src/pages/Home.tsx",
-          "src/types/index.ts"
-        ],
-        "filesToRead": [],
-        "estimatedComplexity": "moderate",
-        "dependencies": [
-          "epic-frontend-foundation",
-          "epic-frontend-foundation"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "Ionic theming system",
-          "React Context for global state"
-        ],
-        "stories": [
-          {
-            "id": "story-ui-001",
-            "title": "Create theme variables and global styles",
-            "description": "Define CSS custom properties for colors, spacing, typography in Ionic format. Support both light and dark themes with system preference detection.",
-            "filesToCreate": [
-              "src/theme/variables.css",
-              "src/theme/global.css"
-            ],
-            "priority": 1,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "CSS variables defined for primary, secondary, success, warning, danger colors",
-              "Dark mode variables defined",
-              "Typography scale established"
-            ]
-          },
-          {
-            "id": "story-ui-002",
-            "title": "Implement ThemeContext with dark/light toggle",
-            "description": "Create ThemeContext for managing theme state, persist preference to localStorage, auto-detect system preference on first load.",
-            "filesToCreate": [
-              "src/contexts/ThemeContext.tsx",
-              "src/hooks/useTheme.ts"
-            ],
-            "priority": 2,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "Theme toggles between light and dark",
-              "Preference persists across sessions",
-              "System preference detected initially"
-            ]
-          },
-          {
-            "id": "story-ui-003",
-            "title": "Create AppLayout with TabBar navigation",
-            "description": "Build the main app layout with IonTabs, IonTabBar, and IonTabButton for main navigation: Dashboard, Friends, Goals, Profile.",
-            "filesToCreate": [
-              "src/components/layout/AppLayout.tsx",
-              "src/components/layout/TabBar.tsx"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Tab bar displays 4 tabs with icons",
-              "Active tab is highlighted",
-              "Smooth navigation between tabs"
-            ]
-          },
-          {
-            "id": "story-ui-004",
-            "title": "Setup routing with protected routes",
-            "description": "Configure IonReactRouter with routes for all pages. Implement ProtectedRoute component that redirects to login if not authenticated.",
-            "filesToModify": [
-              "src/App.tsx"
-            ],
-            "filesToCreate": [
-              "src/router/AppRouter.tsx",
-              "src/router/ProtectedRoute.tsx",
-              "src/pages/Home.tsx"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Public routes accessible without auth",
-              "Protected routes redirect to login",
-              "Navigation state preserved"
-            ]
-          },
-          {
-            "id": "story-ui-005",
-            "title": "Create common UI components",
-            "description": "Build reusable components: LoadingSpinner (IonSpinner wrapper), ErrorBoundary for error handling, EmptyState for no-data scenarios.",
-            "filesToCreate": [
-              "src/components/common/LoadingSpinner.tsx",
-              "src/components/common/ErrorBoundary.tsx",
-              "src/components/common/EmptyState.tsx"
-            ],
-            "priority": 5,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "LoadingSpinner shows centered spinner",
-              "ErrorBoundary catches and displays errors",
-              "Components are reusable across app"
-            ]
-          },
-          {
-            "id": "story-ui-006",
-            "title": "Define TypeScript types and interfaces",
-            "description": "Create shared type definitions for User, Step, SharingRelationship, GroupGoal, API responses matching backend models.",
-            "filesToCreate": [
-              "src/types/index.ts",
-              "src/types/user.ts",
-              "src/types/step.ts",
-              "src/types/sharing.ts",
-              "src/types/goal.ts",
-              "src/types/api.ts"
-            ],
-            "priority": 6,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "Types match backend model structure",
-              "API response types defined",
-              "Proper use of TypeScript generics"
-            ]
-          }
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-auth-ui",
-        "title": "Auth UI - Login, Register, Password Recovery",
-        "description": "Implement the complete authentication flow with login, registration, and secure token management using the backend API.",
-        "targetRepository": "project-app-pasos-frontend",
-        "affectedRepositories": [
-          "project-app-pasos-frontend"
-        ],
-        "filesToModify": [
-          "src/App.tsx",
-          "src/router/AppRouter.tsx"
-        ],
-        "filesToCreate": [
-          "src/contexts/AuthContext.tsx",
-          "src/hooks/useAuth.ts",
-          "src/services/api.ts",
-          "src/services/authService.ts",
-          "src/pages/auth/LoginPage.tsx",
-          "src/pages/auth/RegisterPage.tsx",
-          "src/pages/auth/ForgotPasswordPage.tsx",
-          "src/components/auth/LoginForm.tsx",
-          "src/components/auth/RegisterForm.tsx",
-          "src/utils/storage.ts",
-          "src/utils/tokenUtils.ts"
-        ],
-        "filesToRead": [],
-        "estimatedComplexity": "complex",
-        "dependencies": [
-          "epic-ui-foundation",
-          "epic-frontend-foundation",
-          "epic-ui-foundation"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "JWT token management pattern",
-          "Axios interceptor for auth"
-        ],
-        "stories": [
-          {
-            "id": "story-auth-001",
-            "title": "Create API service with axios instance",
-            "description": "Setup axios instance with base URL, request/response interceptors for auth token injection and 401 handling with automatic token refresh.",
-            "filesToCreate": [
-              "src/services/api.ts",
-              "src/utils/tokenUtils.ts",
-              "src/utils/storage.ts"
-            ],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Axios instance configured with base URL",
-              "Auth token automatically added to requests",
-              "401 responses trigger token refresh",
-              "Failed refresh clears auth state"
-            ]
-          },
-          {
-            "id": "story-auth-002",
-            "title": "Implement AuthContext and useAuth hook",
-            "description": "Create AuthContext to manage user state, login/logout/register functions. Persist tokens to secure storage. Auto-login on app start if tokens valid.",
-            "filesToCreate": [
-              "src/contexts/AuthContext.tsx",
-              "src/hooks/useAuth.ts",
               "src/services/authService.ts"
             ],
-            "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "AuthContext provides user, isAuthenticated, isLoading",
-              "login() calls API and stores tokens",
-              "logout() clears tokens and state",
-              "register() creates account and logs in"
-            ]
-          },
-          {
-            "id": "story-auth-003",
-            "title": "Build Login page with form validation",
-            "description": "Create LoginPage with email/password form using Ionic inputs. Validate inputs, show loading state, handle errors with toast messages.",
             "filesToModify": [
-              "src/router/AppRouter.tsx"
+              "src/services/index.ts"
             ],
-            "filesToCreate": [
-              "src/pages/auth/LoginPage.tsx",
-              "src/components/auth/LoginForm.tsx"
+            "acceptanceCriteria": [
+              "login() calls POST /api/auth/login and stores tokens",
+              "register() calls POST /api/auth/register and stores tokens",
+              "refreshToken() calls POST /api/auth/refresh",
+              "logout() clears stored tokens",
+              "getCurrentUser() calls GET /api/auth/me"
             ],
             "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Email and password fields with validation",
-              "Loading spinner during API call",
-              "Error messages shown for invalid credentials",
-              "Success redirects to dashboard"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-auth-004",
-            "title": "Build Register page with username availability check",
-            "description": "Create RegisterPage with username, email, password, confirm password fields. Check username availability in real-time using /users/check/username endpoint.",
+            "id": "story-auth-4",
+            "title": "Create LoginForm component with validation",
+            "description": "Create reusable LoginForm component with email and password inputs, client-side validation, loading state, and error display using Ionic components",
             "filesToCreate": [
-              "src/pages/auth/RegisterPage.tsx",
-              "src/components/auth/RegisterForm.tsx"
+              "src/components/auth/LoginForm.tsx",
+              "src/components/auth/LoginForm.css",
+              "src/components/auth/index.ts"
+            ],
+            "filesToModify": [],
+            "acceptanceCriteria": [
+              "Email input with format validation",
+              "Password input with min length validation",
+              "Submit button with loading state",
+              "Error message display for validation and API errors",
+              "Calls onSubmit callback with credentials"
             ],
             "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All fields validate on blur",
-              "Username availability checked with debounce",
-              "Password confirmation matches",
-              "Success shows welcome and redirects"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-auth-005",
-            "title": "Create Forgot Password page placeholder",
-            "description": "Build ForgotPasswordPage with email input. Since backend doesn't have password reset endpoint, show informational message about contacting support.",
+            "id": "story-auth-5",
+            "title": "Create RegisterForm component with validation",
+            "description": "Create reusable RegisterForm component with username, email, password, confirm password inputs, validation, and error display",
             "filesToCreate": [
-              "src/pages/auth/ForgotPasswordPage.tsx"
+              "src/components/auth/RegisterForm.tsx",
+              "src/components/auth/RegisterForm.css"
             ],
-            "priority": 5,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "Email input with validation",
-              "Informational message displayed",
-              "Link back to login page"
-            ]
-          }
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-dashboard",
-        "title": "Dashboard - Step Counter, History, and Charts",
-        "description": "Build the main dashboard view showing today's step count, weekly trends with charts, hourly distribution, and statistics.",
-        "targetRepository": "project-app-pasos-frontend",
-        "affectedRepositories": [
-          "project-app-pasos-frontend"
-        ],
-        "filesToModify": [
-          "src/router/AppRouter.tsx"
-        ],
-        "filesToCreate": [
-          "src/pages/DashboardPage.tsx",
-          "src/components/dashboard/StepCounter.tsx",
-          "src/components/dashboard/WeeklyChart.tsx",
-          "src/components/dashboard/HourlyChart.tsx",
-          "src/components/dashboard/StatsCard.tsx",
-          "src/components/dashboard/ProgressRing.tsx",
-          "src/hooks/useSteps.ts",
-          "src/services/stepsService.ts"
-        ],
-        "filesToRead": [],
-        "estimatedComplexity": "complex",
-        "dependencies": [
-          "epic-auth-ui",
-          "epic-ui-foundation"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "Chart.js with React wrapper",
-          "Custom hooks for data fetching"
-        ],
-        "stories": [
-          {
-            "id": "story-dash-001",
-            "title": "Create steps service and useSteps hook",
-            "description": "Implement stepsService with methods for all steps endpoints (today, weekly, hourly-peaks, stats, record). Create useSteps hook for data fetching with loading/error states.",
-            "filesToCreate": [
-              "src/services/stepsService.ts",
-              "src/hooks/useSteps.ts"
-            ],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All API endpoints covered",
-              "Hook returns data, loading, error, refetch",
-              "Automatic refetch on mount option"
-            ]
-          },
-          {
-            "id": "story-dash-002",
-            "title": "Build StepCounter component with progress ring",
-            "description": "Create main step counter display showing today's total with animated circular progress ring. Calculate percentage based on daily goal (default 10,000 steps).",
-            "filesToCreate": [
-              "src/components/dashboard/StepCounter.tsx",
-              "src/components/dashboard/ProgressRing.tsx"
-            ],
-            "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Large step count number displayed",
-              "Circular progress ring animates",
-              "Percentage and remaining steps shown",
-              "Daily goal is configurable"
-            ]
-          },
-          {
-            "id": "story-dash-003",
-            "title": "Build WeeklyChart with bar/line chart",
-            "description": "Create weekly trend chart using Chart.js showing steps for last 7 days. Support toggle between bar and line chart. Show day labels and step counts.",
-            "filesToCreate": [
-              "src/components/dashboard/WeeklyChart.tsx"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Chart displays 7 days of data",
-              "Bar/line toggle works",
-              "Responsive on mobile",
-              "Tooltip shows exact values"
-            ]
-          },
-          {
-            "id": "story-dash-004",
-            "title": "Build HourlyChart for daily distribution",
-            "description": "Create hourly distribution chart showing step activity by hour for selected day. Default to today, allow date selection.",
-            "filesToCreate": [
-              "src/components/dashboard/HourlyChart.tsx"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "24-hour chart displayed",
-              "Date picker for day selection",
-              "Peak hours highlighted",
-              "Empty hours show zero"
-            ]
-          },
-          {
-            "id": "story-dash-005",
-            "title": "Build StatsCard components for statistics",
-            "description": "Create stat cards showing: total steps (all time), average daily, best day, current streak. Use IonCard with icons.",
-            "filesToCreate": [
-              "src/components/dashboard/StatsCard.tsx"
-            ],
-            "priority": 5,
-            "complexity": "simple",
-            "acceptanceCriteria": [
-              "Four stats displayed in grid",
-              "Icons indicate stat type",
-              "Numbers formatted nicely",
-              "Skeleton loading state"
-            ]
-          },
-          {
-            "id": "story-dash-006",
-            "title": "Assemble DashboardPage with all components",
-            "description": "Create DashboardPage combining StepCounter, WeeklyChart, HourlyChart, and StatsCards. Implement pull-to-refresh for data reload.",
             "filesToModify": [
-              "src/router/AppRouter.tsx"
+              "src/components/auth/index.ts"
             ],
-            "filesToCreate": [
-              "src/pages/DashboardPage.tsx"
+            "acceptanceCriteria": [
+              "Username input with min/max length validation",
+              "Email input with format validation",
+              "Password input with strength requirements",
+              "Confirm password match validation",
+              "Submit button with loading state",
+              "Error message display"
+            ],
+            "priority": 5,
+            "complexity": "simple"
+          },
+          {
+            "id": "story-auth-6",
+            "title": "Update AuthContext with real authService",
+            "description": "Refactor AuthContext to use authService instead of simulated login, add token refresh logic, persist auth state on app restart",
+            "filesToModify": [
+              "src/contexts/AuthContext.tsx",
+              "src/hooks/useAuth.ts"
+            ],
+            "filesToCreate": [],
+            "acceptanceCriteria": [
+              "login() calls authService.login() and updates user state",
+              "register() calls authService.register() and updates user state",
+              "logout() calls authService.logout() and clears state",
+              "On mount, checks stored token and loads user",
+              "Handles token refresh on 401 errors"
             ],
             "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All components render correctly",
-              "Pull-to-refresh works",
-              "Loading states shown appropriately",
-              "Error handling with retry option"
-            ]
-          }
-        ],
-        "repoType": "frontend"
-      },
-      {
-        "id": "epic-sharing-ui",
-        "title": "Sharing UI - Friends and Step Data Sharing",
-        "description": "Implement the social features for sending/receiving sharing requests and viewing friends' step data.",
-        "targetRepository": "project-app-pasos-frontend",
-        "affectedRepositories": [
-          "project-app-pasos-frontend"
-        ],
-        "filesToModify": [
-          "src/router/AppRouter.tsx"
-        ],
-        "filesToCreate": [
-          "src/pages/FriendsPage.tsx",
-          "src/pages/FriendDetailPage.tsx",
-          "src/components/sharing/FriendsList.tsx",
-          "src/components/sharing/FriendCard.tsx",
-          "src/components/sharing/PendingRequests.tsx",
-          "src/components/sharing/AddFriendModal.tsx",
-          "src/components/sharing/FriendStatsView.tsx",
-          "src/hooks/useSharing.ts",
-          "src/services/sharingService.ts"
-        ],
-        "filesToRead": [],
-        "estimatedComplexity": "complex",
-        "dependencies": [
-          "epic-dashboard",
-          "epic-ui-foundation"
-        ],
-        "executionOrder": 2,
-        "followsPatterns": [
-          "Modal for user search",
-          "List with action buttons"
-        ],
-        "stories": [
-          {
-            "id": "story-share-001",
-            "title": "Create sharing service and useSharing hook",
-            "description": "Implement sharingService for all sharing endpoints (send request, accept, reject, revoke, get relationships, get stats). Create useSharing hook with relationship state management.",
-            "filesToCreate": [
-              "src/services/sharingService.ts",
-              "src/hooks/useSharing.ts"
-            ],
-            "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All API endpoints covered",
-              "Hook manages accepted and pending lists",
-              "Optimistic updates for accept/reject"
-            ]
+            "complexity": "moderate"
           },
           {
-            "id": "story-share-002",
-            "title": "Build FriendsList and FriendCard components",
-            "description": "Create scrollable list of accepted friends showing username, avatar placeholder, today's steps, and quick action button. FriendCard is tappable to view details.",
-            "filesToCreate": [
-              "src/components/sharing/FriendsList.tsx",
-              "src/components/sharing/FriendCard.tsx"
-            ],
-            "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "List shows all accepted friends",
-              "Each card shows friend info and steps",
-              "Tap navigates to detail view",
-              "Empty state when no friends"
-            ]
-          },
-          {
-            "id": "story-share-003",
-            "title": "Build PendingRequests component",
-            "description": "Show incoming and outgoing pending requests with accept/reject buttons for incoming and cancel for outgoing.",
-            "filesToCreate": [
-              "src/components/sharing/PendingRequests.tsx"
-            ],
-            "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Incoming requests have accept/reject",
-              "Outgoing requests show pending status",
-              "Actions update list immediately",
-              "Badge shows pending count"
-            ]
-          },
-          {
-            "id": "story-share-004",
-            "title": "Build AddFriendModal with user search",
-            "description": "Create modal with search input to find users by username. Show search results with add button. Use /users/search endpoint with debounced input.",
-            "filesToCreate": [
-              "src/components/sharing/AddFriendModal.tsx"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Search input with debounce (300ms)",
-              "Results show matching users",
-              "Add button sends sharing request",
-              "Success feedback shown"
-            ]
-          },
-          {
-            "id": "story-share-005",
-            "title": "Build FriendDetailPage with FriendStatsView",
-            "description": "Create detail page showing friend's step statistics: today, weekly chart, stats. Same layout as personal dashboard but read-only.",
+            "id": "story-auth-7",
+            "title": "Update Login and Register pages with forms",
+            "description": "Integrate LoginForm and RegisterForm components into Login.tsx and Register.tsx pages, handle navigation on success",
             "filesToModify": [
-              "src/router/AppRouter.tsx"
+              "src/pages/Login.tsx",
+              "src/pages/Register.tsx"
             ],
-            "filesToCreate": [
-              "src/pages/FriendDetailPage.tsx",
-              "src/components/sharing/FriendStatsView.tsx"
-            ],
-            "priority": 5,
-            "complexity": "moderate",
+            "filesToCreate": [],
             "acceptanceCriteria": [
-              "Shows friend's name and stats",
-              "Weekly chart displays their data",
-              "Stats cards show their metrics",
-              "Back navigation works"
-            ]
-          },
-          {
-            "id": "story-share-006",
-            "title": "Assemble FriendsPage with tabs",
-            "description": "Create FriendsPage with segment tabs for Friends list and Pending requests. Add FAB button to open AddFriendModal.",
-            "filesToModify": [
-              "src/router/AppRouter.tsx"
+              "Login page renders LoginForm component",
+              "Register page renders RegisterForm component",
+              "Successful login redirects to /dashboard",
+              "Successful register redirects to /dashboard",
+              "Link to switch between login and register"
             ],
-            "filesToCreate": [
-              "src/pages/FriendsPage.tsx"
-            ],
-            "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Tab segments switch views",
-              "FAB opens add friend modal",
-              "Pull-to-refresh reloads data",
-              "Loading and error states"
-            ]
+            "priority": 7,
+            "complexity": "simple"
           }
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-goals-ui",
-        "title": "Goals UI - Group Goals and Progress Tracking",
-        "description": "Build the group goals feature for creating shared step challenges, inviting friends, and tracking collective progress.",
+        "title": "Implement Goals UI with Full Functionality",
+        "description": "Create complete Goals page with goals list, create goal modal, goal detail view, invite users functionality, and progress tracking. Includes goalsService for API calls and useGoals hook for state management",
         "targetRepository": "project-app-pasos-frontend",
         "affectedRepositories": [
           "project-app-pasos-frontend"
         ],
         "filesToModify": [
+          "src/pages/Goals.tsx",
+          "src/services/index.ts",
+          "src/hooks/index.ts",
           "src/router/AppRouter.tsx"
         ],
         "filesToCreate": [
-          "src/pages/GoalsPage.tsx",
-          "src/pages/GoalDetailPage.tsx",
-          "src/pages/CreateGoalPage.tsx",
-          "src/components/goals/GoalsList.tsx",
-          "src/components/goals/GoalCard.tsx",
-          "src/components/goals/GoalProgress.tsx",
-          "src/components/goals/MembersList.tsx",
-          "src/components/goals/InviteMemberModal.tsx",
-          "src/components/goals/CreateGoalForm.tsx",
+          "src/services/goalsService.ts",
           "src/hooks/useGoals.ts",
-          "src/services/goalsService.ts"
+          "src/components/goals/GoalCard.tsx",
+          "src/components/goals/GoalCard.css",
+          "src/components/goals/CreateGoalModal.tsx",
+          "src/components/goals/CreateGoalModal.css",
+          "src/components/goals/GoalProgressBar.tsx",
+          "src/components/goals/GoalProgressBar.css",
+          "src/components/goals/GoalMembersList.tsx",
+          "src/components/goals/GoalMembersList.css",
+          "src/components/goals/InviteUserModal.tsx",
+          "src/components/goals/InviteUserModal.css",
+          "src/components/goals/index.ts",
+          "src/pages/GoalDetailPage.tsx",
+          "src/pages/GoalDetailPage.css"
         ],
-        "filesToRead": [],
+        "filesToRead": [
+          "src/services/stepsService.ts",
+          "src/hooks/useSteps.ts",
+          "src/types/goal.ts"
+        ],
         "estimatedComplexity": "complex",
         "dependencies": [
-          "epic-sharing-ui",
-          "epic-ui-foundation"
+          "epic-auth-ui",
+          "epic-auth-ui"
         ],
         "executionOrder": 2,
         "followsPatterns": [
-          "Form with date pickers",
-          "Progress visualization"
+          "Service pattern matches stepsService",
+          "Hook pattern matches useSteps",
+          "Component structure matches sharing components"
         ],
         "stories": [
           {
-            "id": "story-goal-001",
-            "title": "Create goals service and useGoals hook",
-            "description": "Implement goalsService for all goals endpoints (create, list, detail, invite, join, leave, progress). Create useGoals hook with goal state management.",
+            "id": "story-goals-1",
+            "title": "Create goalsService for goals API",
+            "description": "Implement goalsService with methods for all goals API endpoints: getUserGoals, createGoal, getGoalDetails, inviteUser, joinGoal, leaveGoal, getGoalProgress",
             "filesToCreate": [
-              "src/services/goalsService.ts",
-              "src/hooks/useGoals.ts"
+              "src/services/goalsService.ts"
+            ],
+            "filesToModify": [
+              "src/services/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "getUserGoals() calls GET /api/goals",
+              "createGoal() calls POST /api/goals",
+              "getGoalDetails() calls GET /api/goals/:id",
+              "inviteUser() calls POST /api/goals/:id/invite",
+              "joinGoal() calls PUT /api/goals/:id/join",
+              "leaveGoal() calls DELETE /api/goals/:id/leave",
+              "getGoalProgress() calls GET /api/goals/:id/progress"
             ],
             "priority": 1,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All API endpoints covered",
-              "Hook manages user's goals list",
-              "Individual goal detail fetching"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-goal-002",
-            "title": "Build GoalsList and GoalCard components",
-            "description": "Create list of user's goals showing title, date range, progress percentage, member count. Cards distinguish active vs completed goals.",
+            "id": "story-goals-2",
+            "title": "Create useGoals hook",
+            "description": "Implement useGoals hook for managing goals state with loading, error handling, and CRUD operations",
             "filesToCreate": [
-              "src/components/goals/GoalsList.tsx",
-              "src/components/goals/GoalCard.tsx"
+              "src/hooks/useGoals.ts"
+            ],
+            "filesToModify": [
+              "src/hooks/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Fetches user goals on mount",
+              "Provides goals array, loading, error states",
+              "createGoal() creates and refreshes list",
+              "joinGoal() accepts invitation and refreshes",
+              "leaveGoal() leaves goal and refreshes",
+              "Refetch function available"
             ],
             "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Cards show goal summary info",
-              "Progress bar indicates completion",
-              "Active/completed visual distinction",
-              "Tap navigates to detail"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-goal-003",
-            "title": "Build CreateGoalForm with validation",
-            "description": "Create form with title, description (optional), target steps, start date, end date. Use IonDatetime for date pickers. Validate date range and step target.",
+            "id": "story-goals-3",
+            "title": "Create GoalCard component",
+            "description": "Create GoalCard component displaying goal title, description, target steps, date range, member count, and progress percentage",
             "filesToCreate": [
-              "src/components/goals/CreateGoalForm.tsx",
-              "src/pages/CreateGoalPage.tsx"
+              "src/components/goals/GoalCard.tsx",
+              "src/components/goals/GoalCard.css",
+              "src/components/goals/index.ts"
+            ],
+            "filesToModify": [],
+            "acceptanceCriteria": [
+              "Displays goal title and description",
+              "Shows target steps and date range",
+              "Shows member count badge",
+              "Shows progress percentage bar",
+              "Click navigates to goal detail",
+              "Visual indication for pending invitations"
             ],
             "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All fields validate properly",
-              "End date must be after start date",
-              "Target steps has min/max limits",
-              "Success creates goal and navigates"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-goal-004",
-            "title": "Build GoalProgress component",
-            "description": "Create progress visualization showing current vs target steps, days remaining, pace indicator (on track/behind/ahead).",
+            "id": "story-goals-4",
+            "title": "Create GoalProgressBar component",
+            "description": "Create reusable progress bar component showing current vs target steps with percentage and visual progress indicator",
             "filesToCreate": [
-              "src/components/goals/GoalProgress.tsx"
+              "src/components/goals/GoalProgressBar.tsx",
+              "src/components/goals/GoalProgressBar.css"
+            ],
+            "filesToModify": [
+              "src/components/goals/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Shows current/target steps text",
+              "Animated progress bar fill",
+              "Percentage label",
+              "Color changes based on progress (red/yellow/green)",
+              "Completed state visual"
             ],
             "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Progress bar/ring shows percentage",
-              "Days remaining calculated",
-              "Pace indicator shows status",
-              "Celebration on completion"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-goal-005",
-            "title": "Build MembersList and InviteMemberModal",
-            "description": "Show list of goal members with their contribution. Modal to invite friends (from accepted sharing relationships only).",
+            "id": "story-goals-5",
+            "title": "Create CreateGoalModal component",
+            "description": "Create modal form for creating new goals with title, description, target steps, start date, and end date inputs with validation",
             "filesToCreate": [
-              "src/components/goals/MembersList.tsx",
-              "src/components/goals/InviteMemberModal.tsx"
+              "src/components/goals/CreateGoalModal.tsx",
+              "src/components/goals/CreateGoalModal.css"
+            ],
+            "filesToModify": [
+              "src/components/goals/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Title input (required, max 100 chars)",
+              "Description textarea (optional)",
+              "Target steps number input (min 1000)",
+              "Date pickers for start and end dates",
+              "End date must be after start date",
+              "Submit creates goal and closes modal",
+              "Cancel closes modal without action"
             ],
             "priority": 5,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Members show name and steps",
-              "Only owner can invite",
-              "Only shared friends shown",
-              "Pending invites indicated"
-            ]
+            "complexity": "moderate"
           },
           {
-            "id": "story-goal-006",
-            "title": "Build GoalDetailPage with all components",
-            "description": "Create detail page showing full goal info, progress, members list, and actions (leave goal, invite if owner).",
+            "id": "story-goals-6",
+            "title": "Update Goals page with list and create",
+            "description": "Implement Goals.tsx with goals list using GoalCard components, empty state, create goal FAB button, and CreateGoalModal integration",
             "filesToModify": [
-              "src/router/AppRouter.tsx"
+              "src/pages/Goals.tsx"
             ],
-            "filesToCreate": [
-              "src/pages/GoalDetailPage.tsx"
+            "filesToCreate": [],
+            "acceptanceCriteria": [
+              "Displays list of user goals using GoalCard",
+              "Shows EmptyState when no goals",
+              "FAB button opens CreateGoalModal",
+              "Pull-to-refresh reloads goals",
+              "Loading spinner while fetching",
+              "Error state with retry option"
             ],
             "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "All goal details displayed",
-              "Owner sees invite button",
-              "Members can leave",
-              "Progress updates on refresh"
-            ]
+            "complexity": "moderate"
           },
           {
-            "id": "story-goal-007",
-            "title": "Assemble GoalsPage with list and FAB",
-            "description": "Create GoalsPage showing goals list with segment for Active/Completed. FAB button to create new goal.",
-            "filesToModify": [
-              "src/router/AppRouter.tsx"
-            ],
+            "id": "story-goals-7",
+            "title": "Create GoalMembersList component",
+            "description": "Create component showing goal members with status badges (active, pending), user avatars, and remove option for creator",
             "filesToCreate": [
-              "src/pages/GoalsPage.tsx"
+              "src/components/goals/GoalMembersList.tsx",
+              "src/components/goals/GoalMembersList.css"
+            ],
+            "filesToModify": [
+              "src/components/goals/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Shows member username and avatar",
+              "Status badge (active/pending)",
+              "Shows join date",
+              "Creator indicated with special badge",
+              "Only creator sees invite button"
             ],
             "priority": 7,
-            "complexity": "simple",
+            "complexity": "simple"
+          },
+          {
+            "id": "story-goals-8",
+            "title": "Create InviteUserModal component",
+            "description": "Create modal for inviting users to a goal with username search and selection",
+            "filesToCreate": [
+              "src/components/goals/InviteUserModal.tsx",
+              "src/components/goals/InviteUserModal.css"
+            ],
+            "filesToModify": [
+              "src/components/goals/index.ts"
+            ],
             "acceptanceCriteria": [
-              "Segment filters goals by status",
-              "FAB opens create goal page",
-              "Empty states for each tab",
-              "Pull-to-refresh works"
-            ]
+              "Username search input with debounce",
+              "Shows matching users list",
+              "Select user to invite",
+              "Confirm/cancel buttons",
+              "Loading state during invite",
+              "Error handling for already invited"
+            ],
+            "priority": 8,
+            "complexity": "moderate"
+          },
+          {
+            "id": "story-goals-9",
+            "title": "Create GoalDetailPage with full functionality",
+            "description": "Create goal detail page showing goal info, progress, members list, and actions (leave, invite)",
+            "filesToCreate": [
+              "src/pages/GoalDetailPage.tsx",
+              "src/pages/GoalDetailPage.css"
+            ],
+            "filesToModify": [
+              "src/router/AppRouter.tsx",
+              "src/pages/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Shows goal title, description, dates",
+              "GoalProgressBar with current progress",
+              "GoalMembersList with all members",
+              "Leave button for non-creators",
+              "Invite button for creator",
+              "Join button for pending invitations",
+              "Back navigation to goals list"
+            ],
+            "priority": 9,
+            "complexity": "moderate"
           }
         ],
         "repoType": "frontend"
       },
       {
-        "id": "epic-native-integration",
-        "title": "Native Integration - Pedometer and Health APIs",
-        "description": "Integrate with native device health APIs (Apple HealthKit on iOS, Google Fit on Android) to automatically track and sync step data.",
+        "id": "epic-dashboard-integration",
+        "title": "Integrate Dashboard with Step Components and Native Data",
+        "description": "Update Dashboard page to use existing step tracking components (StepCounter, WeeklyChart, HourlyChart, ProgressRing, StatsCard), integrate native health data from HealthKit/Health Connect, and sync steps to backend",
         "targetRepository": "project-app-pasos-frontend",
         "affectedRepositories": [
           "project-app-pasos-frontend"
         ],
         "filesToModify": [
-          "src/services/stepsService.ts",
-          "src/components/dashboard/StepCounter.tsx"
+          "src/pages/Dashboard.tsx",
+          "src/hooks/index.ts"
         ],
         "filesToCreate": [
-          "src/services/healthService.ts",
-          "src/hooks/useHealthData.ts",
-          "src/components/settings/HealthPermissions.tsx",
-          "src/pages/ProfilePage.tsx",
-          "src/utils/healthPermissions.ts"
+          "src/hooks/useNativeSteps.ts",
+          "src/pages/Dashboard.css"
         ],
-        "filesToRead": [],
-        "estimatedComplexity": "complex",
+        "filesToRead": [
+          "src/utils/health.ts",
+          "src/hooks/useSteps.ts",
+          "src/components/dashboard/StepCounter.tsx",
+          "src/components/dashboard/WeeklyChart.tsx"
+        ],
+        "estimatedComplexity": "moderate",
         "dependencies": [
-          "epic-dashboard",
-          "epic-dashboard"
+          "epic-auth-ui",
+          "epic-goals-ui"
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "Capacitor plugin integration",
-          "Permission request flow"
+          "Hook pattern matches useSteps",
+          "Uses existing health.ts utilities",
+          "Component integration matches existing patterns"
         ],
         "stories": [
           {
-            "id": "story-native-001",
-            "title": "Create healthService for native step data",
-            "description": "Implement healthService using Capacitor Health plugin. Methods for: checking availability, requesting permissions, fetching today's steps, fetching historical steps.",
+            "id": "story-dashboard-1",
+            "title": "Create useNativeSteps hook",
+            "description": "Create hook that integrates with health.ts to get native step data, handle permissions, and sync to backend using stepsService",
             "filesToCreate": [
-              "src/services/healthService.ts",
-              "src/utils/healthPermissions.ts"
+              "src/hooks/useNativeSteps.ts"
+            ],
+            "filesToModify": [
+              "src/hooks/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "Checks health availability on mount",
+              "Requests permissions if needed",
+              "Gets today's native steps",
+              "Syncs native steps to backend via recordSteps",
+              "Provides isNative, nativeSteps, permissionGranted states",
+              "Handles web fallback gracefully"
             ],
             "priority": 1,
-            "complexity": "complex",
-            "acceptanceCriteria": [
-              "Service detects platform (iOS/Android/web)",
-              "Permission request works on native",
-              "Step data fetched from Health/Fit",
-              "Graceful fallback on web"
-            ]
+            "complexity": "moderate"
           },
           {
-            "id": "story-native-002",
-            "title": "Create useHealthData hook for step syncing",
-            "description": "Create hook that fetches native step data and syncs to backend. Handle background sync, conflict resolution (native vs manual), and sync status.",
+            "id": "story-dashboard-2",
+            "title": "Update Dashboard with step components",
+            "description": "Integrate StepCounter, WeeklyChart, HourlyChart, StatsCard, and ProgressRing components into Dashboard page with proper layout and data binding",
+            "filesToModify": [
+              "src/pages/Dashboard.tsx"
+            ],
             "filesToCreate": [
-              "src/hooks/useHealthData.ts"
+              "src/pages/Dashboard.css"
+            ],
+            "acceptanceCriteria": [
+              "StepCounter shows today's steps with goal progress",
+              "ProgressRing shows daily goal completion",
+              "WeeklyChart shows 7-day trend",
+              "HourlyChart shows today's hourly distribution",
+              "StatsCard shows week/month/all-time stats",
+              "Responsive grid layout"
             ],
             "priority": 2,
-            "complexity": "complex",
-            "acceptanceCriteria": [
-              "Hook fetches native steps",
-              "Syncs to backend automatically",
-              "Avoids duplicate step records",
-              "Shows sync status"
-            ]
+            "complexity": "moderate"
           },
           {
-            "id": "story-native-003",
-            "title": "Build HealthPermissions settings component",
-            "description": "Create settings section showing health data connection status, permission toggle, last sync time, and manual sync button.",
-            "filesToCreate": [
-              "src/components/settings/HealthPermissions.tsx"
+            "id": "story-dashboard-3",
+            "title": "Integrate native steps with dashboard",
+            "description": "Connect useNativeSteps hook with Dashboard, show native vs synced indicator, handle permission request UI",
+            "filesToModify": [
+              "src/pages/Dashboard.tsx"
+            ],
+            "filesToCreate": [],
+            "acceptanceCriteria": [
+              "Dashboard uses useNativeSteps hook",
+              "Shows permission request button if not granted",
+              "Indicates when showing native data",
+              "Auto-syncs native steps on app foreground",
+              "Pull-to-refresh triggers sync",
+              "Loading states during sync"
             ],
             "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Shows connection status",
-              "Toggle requests/revokes permission",
-              "Last sync timestamp shown",
-              "Manual sync button triggers sync"
-            ]
-          },
-          {
-            "id": "story-native-004",
-            "title": "Integrate health data in StepCounter",
-            "description": "Modify StepCounter to prioritize native health data when available. Show data source indicator (native vs manual).",
-            "filesToModify": [
-              "src/components/dashboard/StepCounter.tsx"
-            ],
-            "priority": 4,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Native data shown when available",
-              "Source indicator displayed",
-              "Manual entry still possible",
-              "Seamless fallback to API data"
-            ]
-          },
-          {
-            "id": "story-native-005",
-            "title": "Create ProfilePage with settings",
-            "description": "Build profile page showing user info, health data settings, theme toggle, and logout button.",
-            "filesToModify": [
-              "src/router/AppRouter.tsx"
-            ],
-            "filesToCreate": [
-              "src/pages/ProfilePage.tsx"
-            ],
-            "priority": 5,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "User info displayed",
-              "Health settings section",
-              "Theme toggle works",
-              "Logout clears state"
-            ]
+            "complexity": "simple"
           }
         ],
         "repoType": "frontend"
       },
       {
         "id": "epic-realtime-client",
-        "title": "Real-time Client - WebSocket Integration",
-        "description": "Implement Socket.io client for real-time updates on step changes, sharing events, and goal progress.",
+        "title": "Implement Socket.io Client for Real-time Features",
+        "description": "Create socket.io client integration with SocketProvider context, useSocket hook, and real-time updates for sharing requests and goal progress",
         "targetRepository": "project-app-pasos-frontend",
         "affectedRepositories": [
           "project-app-pasos-frontend"
         ],
         "filesToModify": [
-          "src/contexts/AuthContext.tsx",
-          "src/hooks/useSteps.ts",
+          "src/contexts/index.ts",
+          "src/hooks/index.ts",
+          "src/router/AppRouter.tsx",
           "src/hooks/useSharing.ts",
           "src/hooks/useGoals.ts"
         ],
         "filesToCreate": [
           "src/services/socketService.ts",
           "src/contexts/SocketContext.tsx",
-          "src/hooks/useSocket.ts",
-          "src/hooks/useRealTimeSteps.ts"
+          "src/hooks/useSocket.ts"
         ],
-        "filesToRead": [],
-        "estimatedComplexity": "complex",
+        "filesToRead": [
+          "src/contexts/AuthContext.tsx",
+          "project-app-pasos-backend/src/socket/types.ts"
+        ],
+        "estimatedComplexity": "moderate",
         "dependencies": [
           "epic-auth-ui",
-          "epic-auth-ui",
-          "epic-dashboard",
-          "epic-sharing-ui",
+          "epic-goals-ui",
           "epic-goals-ui"
         ],
         "executionOrder": 3,
         "followsPatterns": [
-          "Socket.io client pattern",
-          "React Context for socket state"
+          "Context pattern matches AuthContext",
+          "Service pattern matches stepsService",
+          "Hook pattern follows existing hooks"
         ],
         "stories": [
           {
-            "id": "story-rt-001",
-            "title": "Create socketService with connection management",
-            "description": "Implement Socket.io client service with connection, disconnection, reconnection logic. Authenticate with JWT token from auth context.",
+            "id": "story-realtime-1",
+            "title": "Create socketService for connection management",
+            "description": "Create socketService singleton that manages socket.io-client connection with auth token, reconnection logic, and event emitters",
             "filesToCreate": [
               "src/services/socketService.ts"
             ],
-            "priority": 1,
-            "complexity": "moderate",
+            "filesToModify": [
+              "src/services/index.ts"
+            ],
             "acceptanceCriteria": [
-              "Connects with auth token",
-              "Auto-reconnects on disconnect",
-              "Exponential backoff for retries",
-              "Connection status exposed"
-            ]
+              "Connect with auth token from storage",
+              "Automatic reconnection on disconnect",
+              "Disconnect on logout",
+              "Event subscription/unsubscription methods",
+              "Connection status tracking",
+              "Error handling and logging"
+            ],
+            "priority": 1,
+            "complexity": "moderate"
           },
           {
-            "id": "story-rt-002",
-            "title": "Create SocketContext and useSocket hook",
-            "description": "Create context to manage socket instance lifecycle, connect on auth, disconnect on logout. Hook provides connection status and event subscription.",
+            "id": "story-realtime-2",
+            "title": "Create SocketContext and Provider",
+            "description": "Create SocketContext with SocketProvider that initializes socket connection when user is authenticated and provides connection status",
             "filesToCreate": [
-              "src/contexts/SocketContext.tsx",
-              "src/hooks/useSocket.ts"
+              "src/contexts/SocketContext.tsx"
+            ],
+            "filesToModify": [
+              "src/contexts/index.ts",
+              "src/router/AppRouter.tsx"
+            ],
+            "acceptanceCriteria": [
+              "Provider initializes socket when authenticated",
+              "Disconnects socket on logout",
+              "Provides isConnected state",
+              "Provides socket instance via context",
+              "Handles reconnection events"
             ],
             "priority": 2,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Socket connects when authenticated",
-              "Disconnects on logout",
-              "Hook returns isConnected status",
-              "Event subscription API"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-rt-003",
-            "title": "Implement real-time step updates",
-            "description": "Create useRealTimeSteps hook that listens for 'steps-updated' events and updates local step data. Emit events when user records steps.",
+            "id": "story-realtime-3",
+            "title": "Create useSocket hook",
+            "description": "Create useSocket hook for subscribing to specific socket events with automatic cleanup on unmount",
             "filesToCreate": [
-              "src/hooks/useRealTimeSteps.ts"
+              "src/hooks/useSocket.ts"
+            ],
+            "filesToModify": [
+              "src/hooks/index.ts"
+            ],
+            "acceptanceCriteria": [
+              "useSocketEvent(event, callback) subscribes to events",
+              "Auto-unsubscribes on unmount",
+              "useSocketEmit() returns emit function",
+              "useSocketConnected() returns connection state",
+              "Type-safe event names and payloads"
             ],
             "priority": 3,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Listens for steps-updated events",
-              "Updates step counts in real-time",
-              "Emits when recording steps",
-              "Friends see updates live"
-            ]
+            "complexity": "simple"
           },
           {
-            "id": "story-rt-004",
-            "title": "Integrate socket events in sharing hooks",
-            "description": "Update useSharing to handle 'sharing:joined' events for new accepted relationships. Show notification on new sharing.",
+            "id": "story-realtime-4",
+            "title": "Integrate real-time updates in sharing features",
+            "description": "Update useSharing hook to listen for sharing:request_received, sharing:request_accepted events and update UI automatically",
             "filesToModify": [
               "src/hooks/useSharing.ts"
             ],
-            "priority": 4,
-            "complexity": "moderate",
+            "filesToCreate": [],
             "acceptanceCriteria": [
-              "Handles sharing:joined events",
-              "Updates friend list live",
-              "Shows notification toast",
-              "No duplicate entries"
-            ]
+              "Listens for sharing:request_received event",
+              "Listens for sharing:request_accepted event",
+              "Listens for sharing:access_revoked event",
+              "Auto-refreshes relationships on events",
+              "Shows notification/toast on new requests"
+            ],
+            "priority": 4,
+            "complexity": "simple"
           },
           {
-            "id": "story-rt-005",
-            "title": "Integrate socket events in goals hooks",
-            "description": "Update useGoals to handle 'goal-progress', 'goal:joined', 'goal:member-joined' events. Update progress and member lists in real-time.",
+            "id": "story-realtime-5",
+            "title": "Integrate real-time updates in goals features",
+            "description": "Update useGoals hook to listen for goal:updated, goal:invitation_received, goal:member_joined events",
             "filesToModify": [
               "src/hooks/useGoals.ts"
             ],
-            "priority": 5,
-            "complexity": "moderate",
+            "filesToCreate": [],
             "acceptanceCriteria": [
-              "Handles all goal events",
-              "Progress updates live",
-              "Member joins show immediately",
-              "Completion celebration triggers"
-            ]
-          },
-          {
-            "id": "story-rt-006",
-            "title": "Connect socket lifecycle to auth context",
-            "description": "Modify AuthContext to initialize socket on successful login and cleanup on logout. Ensure socket reconnects after token refresh.",
-            "filesToModify": [
-              "src/contexts/AuthContext.tsx"
+              "Listens for goal:invitation_received event",
+              "Listens for goal:member_joined event",
+              "Listens for goal:progress_updated event",
+              "Auto-refreshes goals on events",
+              "Updates progress in real-time"
             ],
-            "priority": 6,
-            "complexity": "moderate",
-            "acceptanceCriteria": [
-              "Socket connects after login",
-              "Socket disconnects on logout",
-              "Reconnects after token refresh",
-              "No memory leaks"
-            ]
+            "priority": 5,
+            "complexity": "simple"
           }
         ],
         "repoType": "frontend"
+      },
+      {
+        "id": "epic-backend-socket-fix",
+        "title": "Fix Backend Socket Handler TODO",
+        "description": "Update goals socket handler to use real GoalsService instead of mock implementation",
+        "targetRepository": "project-app-pasos-backend",
+        "affectedRepositories": [
+          "project-app-pasos-backend"
+        ],
+        "filesToModify": [
+          "src/socket/handlers/goals.handler.ts"
+        ],
+        "filesToCreate": [],
+        "filesToRead": [
+          "src/services/goals.service.ts",
+          "src/socket/types.ts"
+        ],
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "executionOrder": 1,
+        "followsPatterns": [
+          "Uses existing GoalsService static methods",
+          "Follows socket handler pattern from sharing.handler.ts"
+        ],
+        "stories": [
+          {
+            "id": "story-backend-1",
+            "title": "Update goals socket handler with real service",
+            "description": "Replace TODO mock implementation in goals.handler.ts with actual GoalsService.getProgress() call",
+            "filesToModify": [
+              "src/socket/handlers/goals.handler.ts"
+            ],
+            "filesToCreate": [],
+            "acceptanceCriteria": [
+              "Import GoalsService",
+              "Replace mock with GoalsService.getProgress()",
+              "Handle errors appropriately",
+              "Emit real progress data to room"
+            ],
+            "priority": 1,
+            "complexity": "simple"
+          }
+        ],
+        "repoType": "backend"
       }
     ]
   }
