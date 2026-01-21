@@ -1,0 +1,290 @@
+{
+  "_metadata": {
+    "agentType": "techlead",
+    "taskId": "6970e0492d00873e7f749ae0",
+    "timestamp": "2026-01-21T15:55:21.251Z",
+    "phase": "techlead",
+    "epicId": "epic-goals-ui",
+    "savedAt": "2026-01-21T15:55:21.251Z",
+    "version": "1.0"
+  },
+  "data": {
+    "epicId": "epic-goals-ui",
+    "storiesCount": 9,
+    "architecture": "## Architecture Overview\n\nThis epic implements the Goals UI feature following existing patterns in the codebase.\n\n### Service Layer\n- **goalsService** (`src/services/goalsService.ts`): Axios-based API service following stepsService pattern\n- Exports: goalsService object + type definitions\n- Re-exported from `src/services/index.ts`\n\n### State Management Layer\n- **useGoals** (`src/hooks/useGoals.ts`): Custom hook following useSteps/useSharing patterns\n- Manages: goals[], loading, error states\n- Provides: CRUD operations with automatic refetch\n- Re-exported from `src/hooks/index.ts`\n\n### Component Layer\n- **GoalProgressBar**: Reusable progress visualization with color coding\n- **GoalCard**: List item component for goal summaries\n- **CreateGoalModal**: Form modal with validation\n- **GoalMembersList**: Member list with role badges\n- **InviteUserModal**: User search and invite modal\n- All exported through barrel file `src/components/goals/index.ts`\n\n### Page Layer\n- **Goals.tsx**: Main goals list page with FAB, pull-to-refresh\n- **GoalDetailPage.tsx**: Goal details with members, progress, actions\n\n### Routing\n- `/goals` → Goals.tsx (existing route)\n- `/goals/:goalId` → GoalDetailPage.tsx (new route in AppRouter.tsx)\n\n### Data Flow\n```\nUser → Page → useGoals → goalsService → Backend API\n                ↓\n          Components\n```\n\n### Verification Commands\n- Typecheck: `npm run typecheck`\n- Lint: `npm run lint`\n- Build: `npm run build`",
+    "stories": [
+      {
+        "id": "epic-goals-ui-story-1",
+        "title": "Create goalsService.ts with all goals API methods",
+        "description": "Create goalsService following the stepsService.ts pattern.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/services/stepsService.ts` pattern: export const object with methods\n- Use axios for API calls with ApiResponse<T> wrapper\n- Import types from `@/types/goal` (GroupGoal, CreateGroupGoalPayload, etc.)\n- API_BASE from `import.meta.env.VITE_API_URL || 'http://localhost:3001/api'`\n\n📦 **REQUIRED METHODS:**\n- `getUserGoals()` → GET /api/goals\n- `createGoal(payload: CreateGroupGoalPayload)` → POST /api/goals\n- `getGoalDetails(goalId: string)` → GET /api/goals/:id\n- `inviteUser(goalId: string, userId: string)` → POST /api/goals/:id/invite\n- `joinGoal(goalId: string)` → PUT /api/goals/:id/join\n- `leaveGoal(goalId: string)` → DELETE /api/goals/:id/leave\n- `getGoalProgress(goalId: string)` → GET /api/goals/:id/progress\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use fetch() - use axios like stepsService\n- Do NOT create class-based service - use object pattern\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 1,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/services/stepsService.ts",
+          "src/types/goal.ts",
+          "src/types/api.ts"
+        ],
+        "filesToModify": [
+          "src/services/index.ts"
+        ],
+        "filesToCreate": [
+          "src/services/goalsService.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given goalsService exists, When getUserGoals() is called, Then it calls GET /api/goals with axios",
+          "Given goalsService exists, When createGoal(payload) is called, Then it calls POST /api/goals with the payload",
+          "Given goalsService exists, When getGoalDetails(id) is called, Then it calls GET /api/goals/:id",
+          "Given goalsService exists, When inviteUser(goalId, userId) is called, Then it calls POST /api/goals/:id/invite",
+          "Given goalsService exists, When joinGoal(goalId) is called, Then it calls PUT /api/goals/:id/join",
+          "Given goalsService exists, When leaveGoal(goalId) is called, Then it calls DELETE /api/goals/:id/leave",
+          "Given goalsService exists, When getGoalProgress(goalId) is called, Then it calls GET /api/goals/:id/progress",
+          "Given src/services/index.ts, When updated, Then goalsService and its types are re-exported"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-2",
+        "title": "Create useGoals.ts hook for goals state management",
+        "description": "Create useGoals hook following the useSteps.ts and useSharing.ts patterns.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/hooks/useSteps.ts` pattern: UseGoalsReturn interface + useGoals function\n- Follow `src/hooks/useSharing.ts` pattern for CRUD operations\n- useState for goals, loading, error states\n- useCallback for all methods (createGoal, joinGoal, leaveGoal, refetch)\n- useEffect for autoFetch on mount\n\n📦 **REQUIRED INTERFACE UseGoalsReturn:**\n- goals: GroupGoal[] | null\n- pendingInvitations: GroupGoalInvitation[]\n- loading: boolean\n- error: string | null\n- refetch: () => Promise<void>\n- createGoal: (payload: CreateGroupGoalPayload) => Promise<boolean>\n- joinGoal: (goalId: string) => Promise<boolean>\n- leaveGoal: (goalId: string) => Promise<boolean>\n- getGoalDetails: (goalId: string) => Promise<GroupGoal | null>\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use Redux/Context - follow existing hooks pattern\n- Do NOT use raw fetch - use goalsService\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-story-1"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/hooks/useSteps.ts",
+          "src/hooks/useSharing.ts",
+          "src/types/goal.ts"
+        ],
+        "filesToModify": [
+          "src/hooks/index.ts"
+        ],
+        "filesToCreate": [
+          "src/hooks/useGoals.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given useGoals hook, When component mounts with autoFetch=true, Then getUserGoals() is called",
+          "Given useGoals hook, When loading, Then loading=true and goals=null",
+          "Given useGoals hook, When createGoal(payload) succeeds, Then refetch() is called automatically",
+          "Given useGoals hook, When joinGoal(id) succeeds, Then refetch() is called automatically",
+          "Given useGoals hook, When leaveGoal(id) succeeds, Then refetch() is called automatically",
+          "Given src/hooks/index.ts, When updated, Then useGoals and UseGoalsReturn are exported"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-3",
+        "title": "Create GoalProgressBar.tsx component with animated progress",
+        "description": "Create GoalProgressBar component for displaying goal progress.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/components/dashboard/ProgressRing.tsx` pattern for progress visualization\n- Use Ionic components (IonProgressBar or custom div-based bar)\n- Export interface GoalProgressBarProps\n- Separate .tsx and .css files\n\n📦 **REQUIRED PROPS:**\n- currentSteps: number\n- targetSteps: number\n- showLabel?: boolean (default true)\n- size?: 'small' | 'default' | 'large'\n\n📦 **REQUIRED FEATURES:**\n- Display current/target text (e.g., '5,000 / 10,000 steps')\n- Progress bar with fill based on percentage\n- Color coding: red (<33%), yellow (33-66%), green (>66%)\n- 'Complete!' badge when 100%\n- CSS animation for fill\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use inline styles for colors - use CSS variables\n- Do NOT hardcode colors - use --ion-color-* variables\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 2,
+        "estimatedComplexity": "simple",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/dashboard/ProgressRing.tsx",
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/goals/GoalProgressBar.tsx",
+          "src/components/goals/GoalProgressBar.css"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalProgressBar with currentSteps=5000 targetSteps=10000, When rendered, Then shows '5,000 / 10,000 steps' and 50% fill",
+          "Given progress < 33%, When rendered, Then bar color is red/danger",
+          "Given progress 33-66%, When rendered, Then bar color is yellow/warning",
+          "Given progress > 66%, When rendered, Then bar color is green/success",
+          "Given progress = 100%, When rendered, Then shows 'Complete!' badge"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-4",
+        "title": "Create GoalCard.tsx component for goal list display",
+        "description": "Create GoalCard component for displaying goal summary in lists.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/components/sharing/FriendCard.tsx` pattern exactly\n- Use IonItem, IonLabel, IonBadge, IonIcon from @ionic/react\n- Use ionicons/icons for icons (flag, people, chevronForward, etc.)\n- Export interface GoalCardProps\n\n📦 **REQUIRED PROPS:**\n- goal: GroupGoalSummary\n- onClick?: (goal: GroupGoalSummary) => void\n- isPendingInvitation?: boolean\n\n📦 **REQUIRED DISPLAY:**\n- Goal name as h2\n- Goal description (truncated) as p\n- Member count badge with people icon\n- Progress percentage with GoalProgressBar (import from ./GoalProgressBar)\n- Days remaining badge\n- Pending invitation visual (IonBadge color='warning' with 'Invited')\n- chevronForward icon for navigation hint\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use div/span for list items - use IonItem\n- Do NOT hardcode styles - use CSS file\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-story-3"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/FriendCard.tsx",
+          "src/types/goal.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/goals/GoalCard.tsx",
+          "src/components/goals/GoalCard.css"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalCard with goal data, When rendered, Then displays goal name and description",
+          "Given GoalCard with memberCount=5, When rendered, Then shows badge with '5' and people icon",
+          "Given GoalCard with progressPercentage=75, When rendered, Then shows GoalProgressBar at 75%",
+          "Given GoalCard with daysRemaining=3, When rendered, Then shows '3 days left' badge",
+          "Given GoalCard with isPendingInvitation=true, When rendered, Then shows 'Invited' warning badge",
+          "Given GoalCard with onClick handler, When clicked, Then onClick(goal) is called"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-5",
+        "title": "Create CreateGoalModal.tsx component with form validation",
+        "description": "Create modal for creating new goals with validated form inputs.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/components/sharing/AddFriendModal.tsx` pattern exactly\n- Use IonModal, IonHeader, IonToolbar, IonContent, IonButton, IonButtons\n- Use IonInput for text/number, IonTextarea for description\n- Use IonDatetime for date pickers\n- useState for form fields and validation errors\n\n📦 **REQUIRED PROPS (CreateGoalModalProps):**\n- isOpen: boolean\n- onClose: () => void\n- onSubmit: (payload: CreateGroupGoalPayload) => Promise<boolean>\n\n📦 **FORM FIELDS:**\n- name: string (required, max 100 chars)\n- description: string (optional, max 500 chars)\n- targetSteps: number (required, min 1000)\n- startDate: string (required, YYYY-MM-DD)\n- endDate: string (required, must be after startDate)\n\n📦 **VALIDATION:**\n- Show inline error messages below fields\n- Disable submit if invalid\n- Reset form on close\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use native HTML inputs - use Ionic inputs\n- Do NOT use external form libraries - use useState validation\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 2,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/AddFriendModal.tsx",
+          "src/types/goal.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/goals/CreateGoalModal.tsx",
+          "src/components/goals/CreateGoalModal.css"
+        ],
+        "acceptanceCriteria": [
+          "Given CreateGoalModal isOpen=true, When rendered, Then shows modal with form",
+          "Given name input empty, When form submitted, Then shows 'Name is required' error",
+          "Given name input > 100 chars, When typing, Then shows 'Max 100 characters' error",
+          "Given targetSteps < 1000, When submitted, Then shows 'Minimum 1000 steps' error",
+          "Given endDate before startDate, When submitted, Then shows 'End date must be after start date' error",
+          "Given valid form, When submitted, Then onSubmit(payload) called and modal closes on success",
+          "Given Cancel clicked, When modal closes, Then form is reset"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-6",
+        "title": "Create GoalMembersList.tsx and InviteUserModal.tsx components",
+        "description": "Create components for displaying goal members and inviting users.\n\n🔧 **PATTERNS TO USE:**\n- GoalMembersList: Follow `src/components/sharing/FriendsList.tsx` pattern\n- InviteUserModal: Follow `src/components/sharing/AddFriendModal.tsx` pattern exactly\n- Use IonList, IonItem, IonAvatar, IonLabel, IonBadge for members\n- Use IonSearchbar with debounce for user search\n\n📦 **GoalMembersList PROPS:**\n- members: GroupGoalMember[]\n- ownerId: string\n- currentUserId: string\n- onInviteClick?: () => void (only shown if currentUserId === ownerId)\n\n📦 **InviteUserModal PROPS:**\n- isOpen: boolean\n- onClose: () => void\n- goalId: string\n- onSearch: (query: string) => Promise<UserSearchResult[]>\n- onInvite: (userId: string) => Promise<boolean>\n- existingMemberIds: string[]\n\n📦 **MEMBER DISPLAY:**\n- Avatar (first letter if no image)\n- Username\n- Status badge: 'Owner' (gold), 'Active' (green), 'Pending' (gray)\n- Contribution steps count\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT show invite button for non-owners\n- Do NOT allow inviting existing members\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 3,
+        "estimatedComplexity": "moderate",
+        "dependencies": [],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/FriendsList.tsx",
+          "src/components/sharing/AddFriendModal.tsx",
+          "src/types/goal.ts",
+          "src/types/social.types.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/goals/GoalMembersList.tsx",
+          "src/components/goals/GoalMembersList.css",
+          "src/components/goals/InviteUserModal.tsx",
+          "src/components/goals/InviteUserModal.css"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalMembersList with members, When rendered, Then displays all members with avatars",
+          "Given member is owner, When rendered, Then shows 'Owner' badge in gold",
+          "Given currentUserId === ownerId, When rendered, Then shows 'Invite' button",
+          "Given currentUserId !== ownerId, When rendered, Then hides 'Invite' button",
+          "Given InviteUserModal with search query, When debounce completes, Then onSearch called",
+          "Given user in existingMemberIds, When in search results, Then shows 'Already member' disabled"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-7",
+        "title": "Create goals components barrel export index.ts",
+        "description": "Create barrel export file for all goals components.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/components/sharing/index.ts` pattern exactly\n- Export all components and their Props interfaces\n\n📦 **EXPORTS:**\n- GoalCard, GoalCardProps\n- GoalProgressBar, GoalProgressBarProps\n- CreateGoalModal, CreateGoalModalProps\n- GoalMembersList, GoalMembersListProps\n- InviteUserModal, InviteUserModalProps\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint",
+        "epicId": "epic-goals-ui",
+        "priority": 4,
+        "estimatedComplexity": "simple",
+        "dependencies": [
+          "epic-goals-ui-story-3",
+          "epic-goals-ui-story-4",
+          "epic-goals-ui-story-5",
+          "epic-goals-ui-story-6"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/components/sharing/index.ts"
+        ],
+        "filesToModify": [],
+        "filesToCreate": [
+          "src/components/goals/index.ts"
+        ],
+        "acceptanceCriteria": [
+          "Given src/components/goals/index.ts, When imported, Then all goal components are accessible",
+          "Given barrel export, When importing { GoalCard } from './goals', Then import works"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-8",
+        "title": "Update Goals.tsx page with list, empty state, and create modal",
+        "description": "Update Goals page to display goals list with full functionality.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/pages/FriendsPage.tsx` pattern for page structure\n- Use useGoals hook for data\n- Use EmptyState from `src/components/common`\n- Use LoadingSpinner from `src/components/common`\n- Use IonFab for floating action button\n- Use IonRefresher for pull-to-refresh\n\n📦 **PAGE STRUCTURE:**\n- IonPage > IonHeader > IonToolbar > IonTitle\n- IonContent with IonRefresher\n- Loading state: LoadingSpinner\n- Error state: IonCard with retry button\n- Empty state: EmptyState component with 'Create Goal' action\n- Goals list: IonList with GoalCard components\n- FAB button: IonFab with add icon to open CreateGoalModal\n\n📦 **INTERACTIONS:**\n- Pull-to-refresh calls refetch()\n- FAB click opens CreateGoalModal\n- GoalCard click navigates to /goals/:id\n- CreateGoalModal submit calls createGoal()\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use fetch/axios directly - use useGoals hook\n- Do NOT use window.location - use useHistory from react-router\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint\n3. npm run build",
+        "epicId": "epic-goals-ui",
+        "priority": 5,
+        "estimatedComplexity": "moderate",
+        "dependencies": [
+          "epic-goals-ui-story-2",
+          "epic-goals-ui-story-4",
+          "epic-goals-ui-story-5",
+          "epic-goals-ui-story-7"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/FriendsPage.tsx",
+          "src/pages/Goals.tsx",
+          "src/components/common/EmptyState.tsx",
+          "src/components/common/LoadingSpinner.tsx"
+        ],
+        "filesToModify": [
+          "src/pages/Goals.tsx"
+        ],
+        "filesToCreate": [],
+        "acceptanceCriteria": [
+          "Given Goals page with loading=true, When rendered, Then shows LoadingSpinner",
+          "Given Goals page with error, When rendered, Then shows error message with retry button",
+          "Given Goals page with empty goals[], When rendered, Then shows EmptyState with 'Create Goal' button",
+          "Given Goals page with goals, When rendered, Then shows IonList with GoalCard for each goal",
+          "Given FAB button clicked, When CreateGoalModal opens, Then modal isOpen=true",
+          "Given CreateGoalModal submitted, When createGoal succeeds, Then modal closes and list refreshes",
+          "Given GoalCard clicked, When navigating, Then goes to /goals/:goalId"
+        ]
+      },
+      {
+        "id": "epic-goals-ui-story-9",
+        "title": "Create GoalDetailPage.tsx with full goal functionality",
+        "description": "Create goal detail page showing full goal info, progress, members, and actions.\n\n🔧 **PATTERNS TO USE:**\n- Follow `src/pages/FriendDetailPage.tsx` pattern for page structure\n- Use useGoals hook + useParams for goalId\n- Use IonPage, IonHeader, IonBackButton, IonContent\n- Use GoalProgressBar, GoalMembersList, InviteUserModal components\n\n📦 **PAGE STRUCTURE:**\n- Header with back button and goal name\n- Goal info card (description, dates, target steps)\n- GoalProgressBar showing current progress\n- GoalMembersList showing all members\n- Action buttons based on user role\n\n📦 **ACTIONS BY ROLE:**\n- Creator: 'Invite User' button opens InviteUserModal\n- Member: 'Leave Goal' button with confirmation\n- Pending invitation: 'Join Goal' and 'Decline' buttons\n\n📦 **DATA FLOW:**\n- useParams to get goalId\n- useGoals.getGoalDetails(goalId) on mount\n- useGoals.joinGoal(goalId) for joining\n- useGoals.leaveGoal(goalId) for leaving\n\n⚠️ **ANTI-PATTERNS TO AVOID:**\n- Do NOT use inline alert - use IonAlert for confirmation\n- Do NOT hardcode routes - use constants or config\n\n**VERIFICATION:**\n1. npm run typecheck\n2. npm run lint\n3. npm run build",
+        "epicId": "epic-goals-ui",
+        "priority": 6,
+        "estimatedComplexity": "complex",
+        "dependencies": [
+          "epic-goals-ui-story-2",
+          "epic-goals-ui-story-3",
+          "epic-goals-ui-story-6",
+          "epic-goals-ui-story-7"
+        ],
+        "status": "pending",
+        "filesToRead": [
+          "src/pages/FriendDetailPage.tsx",
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToModify": [
+          "src/router/AppRouter.tsx"
+        ],
+        "filesToCreate": [
+          "src/pages/GoalDetailPage.tsx",
+          "src/pages/GoalDetailPage.css"
+        ],
+        "acceptanceCriteria": [
+          "Given GoalDetailPage with goalId, When mounted, Then fetches goal details",
+          "Given goal loaded, When rendered, Then shows goal name, description, dates",
+          "Given goal loaded, When rendered, Then shows GoalProgressBar with current/target",
+          "Given goal loaded, When rendered, Then shows GoalMembersList with all members",
+          "Given user is creator, When rendered, Then shows 'Invite User' button",
+          "Given user is member, When 'Leave Goal' clicked, Then shows IonAlert confirmation",
+          "Given user has pending invitation, When 'Join' clicked, Then joinGoal called",
+          "Given AppRouter, When updated, Then includes route for /goals/:goalId"
+        ]
+      }
+    ]
+  }
+}
